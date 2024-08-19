@@ -19,4 +19,6 @@ cmake .. -G Ninja \
 
 ninja -j4 install
 
+ninja check
+
 cd -
