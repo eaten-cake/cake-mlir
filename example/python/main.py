@@ -1,5 +1,5 @@
-from mlir import ir, passmanager, execution_engine
-from mlir.dialects import func, arith
+from cake_mlir import ir, passmanager, execution_engine
+from cake_mlir.dialects import func, arith
 
 import numpy as np
 

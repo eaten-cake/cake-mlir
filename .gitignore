@@ -1,3 +1,8 @@
+# ignore vscode workspace files
 .vscode
+# ignore build directorys
 /build
 /build-*
+# ignore onnx model files
+*.onnx
+
