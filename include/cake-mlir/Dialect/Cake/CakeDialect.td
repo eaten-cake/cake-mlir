@@ -12,8 +12,8 @@ def Cake_Dialect : Dialect {
 
     let cppNamespace = "::mlir::cake";
 
-    let useDefaultTypePrinterParser = 1;
-    let hasConstantMaterializer = 1;
+    // let useDefaultTypePrinterParser = 1;
+    // let hasConstantMaterializer = 1;
 }
 
 #endif // CAKE_MLIR_DIALECT_CAKEDIALECT_TD_

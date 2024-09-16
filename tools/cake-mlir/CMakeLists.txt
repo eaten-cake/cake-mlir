@@ -5,6 +5,8 @@ set (
     LIBS
     ${dialect_libs}
     ${conversion_libs}
+
+    MLIRIR
 )
 
 add_llvm_executable(cake-mlir cake-mlir.cc)
