@@ -7,6 +7,7 @@
 ```bash
 git clone https://github.com/eaten-cake/cake-mlir.git
 cd cake-mlir
+git submodule update --init --recursive 
 ```
 
 #### 安装python环境依赖

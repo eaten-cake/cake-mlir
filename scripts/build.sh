@@ -8,9 +8,10 @@ mkdir -p $SCRIPT_DIR/../build
 cd $SCRIPT_DIR/../build
 
 # LLVM installation directory
-export LLVM_INSTALL_DIR=/home/yrx/llvm-project/build
+export LLVM_INSTALL_DIR=$(llvm-config --prefix)
 # python executable path
-export PYTHON_EXECUTABLE=/home/yrx/.conda/envs/mlir/bin/python
+# default: current env python path
+export PYTHON_EXECUTABLE=$(which python)
 
 cmake .. -G Ninja \
     -DCMAKE_C_COMPILER=clang \
