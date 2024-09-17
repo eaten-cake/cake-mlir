@@ -5,4 +5,8 @@
 /build-*
 # ignore onnx model files
 *.onnx
+# ignore shared library files
+*.so
+*.dylib
+*.dll
 

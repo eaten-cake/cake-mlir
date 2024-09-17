@@ -1,4 +1,4 @@
-from cake_mlir import ir, passmanager, execution_engine
+from cake_mlir import ir, passmanager, execution_engine, runtime
 from cake_mlir.dialects import func, arith
 
 import numpy as np
@@ -11,7 +11,8 @@ def create_abs(ctx : ir.Context):
         with ir.InsertionPoint(module.body):
             i32 = ir.IntegerType.get_signless(32)
             func_type = ir.FunctionType.get([], [i32])
-            func_op = func.FuncOp(name="abs", type=func_type, visibility="public")
+            func_op = func.FuncOp(name="abs", type=func_type)
+            func_op.attributes["llvm.emit_c_interface"] = ir.UnitAttr.get()
             entry_block = func_op.add_entry_block()
             with ir.InsertionPoint(entry_block):
                 zero = arith.ConstantOp(result=i32, value=0)
@@ -36,6 +37,7 @@ def create_abs(ctx : ir.Context):
 #         return module
 
 if __name__ == '__main__':
+
     ctx = ir.Context()
     ctx.allow_unregistered_dialects = True
     mod = create_abs(ctx)
@@ -52,9 +54,10 @@ if __name__ == '__main__':
     pm.run(mod.operation)
     print(mod)
     exe = execution_engine.ExecutionEngine(mod, opt_level=3)
-    abs_func = exe.lookup("abs")
-    # result = abs_func(ctypes.c_int32(42))
-    # print("Result:", result)
+    c_int32_p = ctypes.c_int32 * 1
+    res = c_int32_p(-1)
+    exe.invoke("abs", res)
+    print("Result:", res[0])
     
     
 
