@@ -12,6 +12,8 @@ git submodule update --init --recursive
 
 #### 安装python环境依赖
 
+**务必保证环境中按照的python版本在3.10及以上，否则可能导致依赖包版本不兼容。**
+
 ```bash
 pip install -r requirements.txt
 ```

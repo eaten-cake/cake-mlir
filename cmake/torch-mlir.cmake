@@ -19,31 +19,31 @@ mlir_tablegen(include/torch-mlir/Dialect/Torch/IR/TorchTypes.h.inc -gen-typedef-
 mlir_tablegen(include/torch-mlir/Dialect/Torch/IR/TorchTypes.cpp.inc -gen-typedef-defs)
 add_public_tablegen_target(TorchDialectTypesGen)
 
-# # Passes.td
-# set(LLVM_TARGET_DEFINITIONS ${TORCH_MLIR_ROOT_DIR}/include/torch-mlir/Dialect/Torch/Transforms/Passes.td)
-# mlir_tablegen(Passes.h.inc -gen-pass-decls)
-# mlir_tablegen(Transforms.capi.h.inc -gen-pass-capi-header)
-# mlir_tablegen(Transforms.capi.cpp.inc -gen-pass-capi-impl)
-# add_public_tablegen_target(TorchDialectTransformsGen)
+# Passes.td
+set(LLVM_TARGET_DEFINITIONS ${TORCH_MLIR_ROOT_DIR}/include/torch-mlir/Dialect/Torch/Transforms/Passes.td)
+mlir_tablegen(include/torch-mlir/Dialect/Torch/Transforms/Passes.h.inc -gen-pass-decls)
+mlir_tablegen(include/torch-mlir/Dialect/Torch/Transforms/Transforms.capi.h.inc -gen-pass-capi-header)
+mlir_tablegen(include/torch-mlir/Dialect/Torch/Transforms/Transforms.capi.cpp.inc -gen-pass-capi-impl)
+add_public_tablegen_target(TorchDialectTransformsGen)
 
-# # TorchConversionOps.td
-# set(LLVM_TARGET_DEFINITIONS ${TORCH_MLIR_ROOT_DIR}/include/torch-mlir/Dialect/TorchConversion/IR/TorchConversionOps.td)
-# mlir_tablegen(TorchConversionOps.h.inc -gen-op-decls)
-# mlir_tablegen(TorchConversionOps.cpp.inc -gen-op-defs)
-# mlir_tablegen(TorchConversionDialect.h.inc -gen-dialect-decls -dialect=torch_c)
-# mlir_tablegen(TorchConversionDialect.cpp.inc -gen-dialect-defs -dialect=torch_c)
-# add_public_tablegen_target(TorchConversionDialectGen)
+# TorchConversionOps.td
+set(LLVM_TARGET_DEFINITIONS ${TORCH_MLIR_ROOT_DIR}/include/torch-mlir/Dialect/TorchConversion/IR/TorchConversionOps.td)
+mlir_tablegen(include/torch-mlir/Dialect/TorchConversion/IR/TorchConversionOps.h.inc -gen-op-decls)
+mlir_tablegen(include/torch-mlir/Dialect/TorchConversion/IR/TorchConversionOps.cpp.inc -gen-op-defs)
+mlir_tablegen(include/torch-mlir/Dialect/TorchConversion/IR/TorchConversionDialect.h.inc -gen-dialect-decls -dialect=torch_c)
+mlir_tablegen(include/torch-mlir/Dialect/TorchConversion/IR/TorchConversionDialect.cpp.inc -gen-dialect-defs -dialect=torch_c)
+add_public_tablegen_target(TorchConversionDialectGen)
 
-# # TorchConversionPasses.td
-# set(LLVM_TARGET_DEFINITIONS ${TORCH_MLIR_ROOT_DIR}/include/torch-mlir/Dialect/TorchConversion/Transforms/Passes.td)
-# if(TORCH_MLIR_ENABLE_STABLEHLO)
-#   mlir_tablegen(Passes.h.inc -gen-pass-decls -DTORCH_MLIR_ENABLE_STABLEHLO)
-# else()
-#   mlir_tablegen(Passes.h.inc -gen-pass-decls)
-# endif()
-# mlir_tablegen(Transforms.capi.h.inc -gen-pass-capi-header)
-# mlir_tablegen(Transforms.capi.cpp.inc -gen-pass-capi-impl)
-# add_public_tablegen_target(TorchConversionDialectTransformsGen)
+# TorchConversionPasses.td
+set(LLVM_TARGET_DEFINITIONS ${TORCH_MLIR_ROOT_DIR}/include/torch-mlir/Dialect/TorchConversion/Transforms/Passes.td)
+if(TORCH_MLIR_ENABLE_STABLEHLO)
+  mlir_tablegen(include/torch-mlir/Dialect/TorchConversion/Transforms/Passes.h.inc -gen-pass-decls -DTORCH_MLIR_ENABLE_STABLEHLO)
+else()
+  mlir_tablegen(include/torch-mlir/Dialect/TorchConversion/Transforms/Passes.h.inc -gen-pass-decls)
+endif()
+mlir_tablegen(include/torch-mlir/Dialect/TorchConversion/Transforms/Transforms.capi.h.inc -gen-pass-capi-header)
+mlir_tablegen(include/torch-mlir/Dialect/TorchConversion/Transforms/Transforms.capi.cpp.inc -gen-pass-capi-impl)
+add_public_tablegen_target(TorchConversionDialectTransformsGen)
 
 file(GLOB _TorchDialectIR_SRCS "${TORCH_MLIR_ROOT_DIR}/lib/Dialect/Torch/IR/*.cpp")
 
