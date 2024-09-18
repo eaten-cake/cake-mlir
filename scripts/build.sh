@@ -26,6 +26,7 @@ cmake .. -G Ninja \
     -DMLIR_DIR="$LLVM_INSTALL_DIR/lib/cmake/mlir/" \
     -DLLVM_DIR="$LLVM_INSTALL_DIR/lib/cmake/llvm/" \
     -DCAKEMLIR_ENABLE_LLD=ON \
+    -DCAKEMLIR_ENABLE_CCACHE=ON \
 
 ninja -j4
 
@@ -38,6 +39,6 @@ ninja check
 # Add the following lines to your ~/.bashrc to use the cake-mlir
 echo_color "You can write following command in your ~/.bashrc to use the cake-mlir:" "yellow"
 echo_color "export PATH=${PROJECT_DIR}/build/bin:\$PATH" "yellow"
-echo_color "export PYTHONPATH=${PROJECT_DIR}/build/python_packages/cake-mlir:\$PYTHONPATH" "yellow"
+echo_color "export PYTHONPATH=${PROJECT_DIR}/build/python_packages/cake_mlir:\$PYTHONPATH" "yellow"
 
 cd -

@@ -1,3 +1,6 @@
 [submodule "3rdparty/stablehlo"]
 	path = 3rdparty/stablehlo
 	url = https://github.com/openxla/stablehlo.git
+[submodule "3rdparty/torch-mlir"]
+	path = 3rdparty/torch-mlir
+	url = https://github.com/llvm/torch-mlir.git

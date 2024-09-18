@@ -12,6 +12,15 @@ add_compile_definitions("MLIR_PYTHON_PACKAGE_PREFIX=cake_mlir.")
 
 declare_mlir_python_sources(CakeMLIRPythonSources)
 
+# Add Torch importer sources.
+declare_mlir_python_sources(CakeMLIRPythonSources.Torch.Importers
+  ADD_TO_PARENT CakeMLIRPythonSources
+  ROOT_DIR "${CakeMLIR_SOURCE_DIR}/3rdparty/torch-mlir/python/torch_mlir"
+  SOURCES
+    extras/fx_importer.py
+    extras/onnx_importer.py
+)
+
 # declare_mlir_dialect_python_bindings(
 #   ADD_TO_PARENT 
 #   ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cake_mlir"
@@ -37,6 +46,8 @@ set(_source_components
   MLIRPythonSources
   MLIRPythonExtension.Core
   MLIRPythonExtension.RegisterEverything
+
+  CakeMLIRPythonSources.Torch.Importers
 
 )
 

@@ -6,9 +6,12 @@ endif()
 
 project(cake-mlir LANGUAGES CXX C)
 
+set(CakeMLIR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
 include(cmake/toolchain.cmake)
 include(cmake/MLIR.cmake)
 include(cmake/stablehlo.cmake)
+include(cmake/torch-mlir.cmake)
 
 add_subdirectory(tests)
 add_subdirectory(lib)
