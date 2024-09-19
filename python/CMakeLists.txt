@@ -11,6 +11,7 @@ add_compile_definitions("MLIR_PYTHON_PACKAGE_PREFIX=cake_mlir.")
 ################################################################################
 
 declare_mlir_python_sources(CakeMLIRPythonSources)
+declare_mlir_python_extension(CakeMLIRPythonExtension)
 
 # Add Torch importer sources.
 declare_mlir_python_sources(CakeMLIRPythonSources.Torch.Importers
@@ -19,6 +20,16 @@ declare_mlir_python_sources(CakeMLIRPythonSources.Torch.Importers
   SOURCES
     extras/fx_importer.py
     extras/onnx_importer.py
+)
+
+declare_mlir_python_sources(CakeMLIRPythonSources.Torch.TopLevel
+  ROOT_DIR "${CakeMLIR_SOURCE_DIR}/3rdparty/torch-mlir/projects/pt1/python/torch_mlir"
+  ADD_TO_PARENT CakeMLIRPythonSources
+  SOURCES
+    torchscript.py
+    _dynamo_fx_importer.py
+    dynamo.py
+    _version.py
 )
 
 # declare_mlir_dialect_python_bindings(
@@ -38,6 +49,34 @@ declare_mlir_python_sources(CakeMLIRPythonSources.Torch.Importers
 #     StandaloneCAPI
 # )
 
+declare_mlir_python_sources(CakeMLIRPythonSources.Torch.Dialects
+  ROOT_DIR "${CakeMLIR_SOURCE_DIR}/3rdparty/torch-mlir/python/torch_mlir"
+  ADD_TO_PARENT CakeMLIRPythonSources
+)
+
+declare_mlir_dialect_python_bindings(
+  ADD_TO_PARENT CakeMLIRPythonSources.Torch.Dialects
+  ROOT_DIR "${CakeMLIR_SOURCE_DIR}/3rdparty/torch-mlir/python/torch_mlir"
+  TD_FILE dialects/TorchBinding.td
+  SOURCES dialects/torch/__init__.py
+  DIALECT_NAME torch
+)
+
+################################################################################
+# Torch Extensions
+################################################################################
+
+declare_mlir_python_extension(CakeMLIRPythonExtension.Torch.Main
+  MODULE_NAME _torchMlir
+  ADD_TO_PARENT CakeMLIRPythonExtension
+  SOURCES
+    ../3rdparty/torch-mlir/python/TorchMLIRModule.cpp
+  EMBED_CAPI_LINK_LIBS
+    TorchMLIRCAPI
+  PRIVATE_LINK_LIBS
+    LLVMSupport
+)
+
 ################################################################################
 # Common CAPI
 ################################################################################
@@ -48,7 +87,9 @@ set(_source_components
   MLIRPythonExtension.RegisterEverything
 
   CakeMLIRPythonSources.Torch.Importers
-
+  CakeMLIRPythonSources.Torch.Dialects
+  CakeMLIRPythonSources.Torch.TopLevel
+  CakeMLIRPythonExtension.Torch.Main
 )
 
 # Add StableHLO Python extensions if requested.
