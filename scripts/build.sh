@@ -12,6 +12,8 @@ mkdir -p $PROJECT_DIR/build
 
 cd $PROJECT_DIR/build
 
+cp ../cmake/config.cmake ./
+
 # LLVM installation directory
 export LLVM_INSTALL_DIR=$(llvm-config --prefix)
 # python executable path

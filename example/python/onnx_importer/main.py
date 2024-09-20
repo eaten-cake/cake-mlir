@@ -7,7 +7,7 @@ from cake_mlir import ir, passmanager
 import torch
 from torch import nn
 
-model_path = "/home/yrx/practice/tvm/models/rnn.onnx"
+model_path = "/home/yrx/practice/tvm/models/add.onnx"
 
 onnx_model = onnx.load(model_path)
 
@@ -26,7 +26,7 @@ print(module)
 
 pipeline_str = """
     builtin.module(
-        torch-backend-to-linalg-on-tensors-backend-pipeline
+        inline, func.func(convert-torch-onnx-to-torch)
     )
 """
 
@@ -34,30 +34,4 @@ pm = passmanager.PassManager.parse(pipeline_str, ctx)
 
 pm.run(module)
 
-class TestModel(nn.Module):
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.linear = nn.Linear(10, 10)
-    
-    def forward(self, x):
-        return self.linear(x)
-    
-model = TestModel()
-model = model.eval()
-
-x = torch.randn(1, 10)
-
-traced_model = torch.jit.trace(model, x)
-
-ctx_torch = ir.Context()
-
-
-# print(dir(traced_model.graph))
-
-# node = traced_model.graph.nodes()[0]
-
-# print(dir(node))
-
-# for node in traced_model.graph.nodes():
-#     print(node)
+print(module)
