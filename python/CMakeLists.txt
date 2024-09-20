@@ -22,16 +22,6 @@ declare_mlir_python_sources(CakeMLIRPythonSources.Torch.Importers
     extras/onnx_importer.py
 )
 
-declare_mlir_python_sources(CakeMLIRPythonSources.Torch.TopLevel
-  ROOT_DIR "${CakeMLIR_SOURCE_DIR}/3rdparty/torch-mlir/projects/pt1/python/torch_mlir"
-  ADD_TO_PARENT CakeMLIRPythonSources
-  SOURCES
-    torchscript.py
-    _dynamo_fx_importer.py
-    dynamo.py
-    _version.py
-)
-
 # declare_mlir_dialect_python_bindings(
 #   ADD_TO_PARENT 
 #   ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cake_mlir"
@@ -88,7 +78,6 @@ set(_source_components
 
   CakeMLIRPythonSources.Torch.Importers
   CakeMLIRPythonSources.Torch.Dialects
-  CakeMLIRPythonSources.Torch.TopLevel
   CakeMLIRPythonExtension.Torch.Main
 )
 

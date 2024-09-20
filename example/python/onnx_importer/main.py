@@ -1,6 +1,6 @@
 import onnx
 
-from cake_mlir.extras import onnx_importer
+from cake_mlir.extras import onnx_importer, fx_importer
 from cake_mlir.dialects import torch as torch_dialect
 from cake_mlir import ir, passmanager
 
