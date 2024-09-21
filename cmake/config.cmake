@@ -18,3 +18,5 @@ set(MLIR_DIR "")
 set(LLVM_DIR "")
 # set the path to Python3 executable
 set(Python3_EXECUTABLE "")
+# set the build type
+set(CMAKE_BUILD_TYPE "Release")

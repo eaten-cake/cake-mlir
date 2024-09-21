@@ -29,6 +29,7 @@ cmake .. -G Ninja \
     -DLLVM_DIR="$LLVM_INSTALL_DIR/lib/cmake/llvm/" \
     -DCAKE_MLIR_ENABLE_LLD=ON \
     -DCAKE_MLIR_ENABLE_CCACHE=ON \
+    -DCMAKE_BUILD_TYPE=Debug \
 
 ninja -j4
 
