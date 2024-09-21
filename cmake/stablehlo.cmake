@@ -11,4 +11,5 @@ if (CAKE_MLIR_ENABLE_STABLEHLO)
     ${CMAKE_CURRENT_BINARY_DIR}/stablehlo
     EXCLUDE_FROM_ALL)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/stablehlo)
+  include_directories(${CMAKE_CURRENT_BINARY_DIR}/stablehlo)
 endif()

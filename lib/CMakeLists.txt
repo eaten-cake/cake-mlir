@@ -7,6 +7,8 @@ set(
     LinkedLibs
 
     CakeDialect
+
+    TorchMLIRInitAll
     
     ${dialect_libs}
     ${conversion_libs}

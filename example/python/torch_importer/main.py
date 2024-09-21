@@ -34,12 +34,11 @@ module = importer.import_frozen_program(
     exported_program
 )
 
-print(importer.module)
-
 pipeline_str = """
     builtin.module(
         torchdynamo-export-to-torch-backend-pipeline,
-        torch-backend-to-linalg-on-tensors-backend-pipeline
+        torch-backend-to-stablehlo-backend-pipeline,
+        stablehlo-legalize-to-linalg
     )
 """
 
@@ -47,4 +46,4 @@ pm = passmanager.PassManager.parse(pipeline_str, ctx)
 
 pm.run(importer.module.operation)
 
-print(importer.module)
+print(importer.module.operation)

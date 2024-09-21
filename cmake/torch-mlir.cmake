@@ -2,13 +2,16 @@ option(CAKE_MLIR_ENABLE_TORCH_MLIR "Enable torch-mlir integration" ON)
 
 if(CAKE_MLIR_ENABLE_TORCH_MLIR)
     message(STATUS "Enabling torch-mlir integration")
+    add_definitions(-DCAKE_MLIR_ENABLE_TORCH_MLIR)
 
     set(TORCH_MLIR_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/torch-mlir)
 
     include_directories(${TORCH_MLIR_ROOT_DIR}/include)
 
-    # There is a circular dependency on the conversion of stablehlo.
-    # set(TORCH_MLIR_ENABLE_STABLEHLO ${CAKE_MLIR_ENABLE_STABLEHLO})
+    set(TORCH_MLIR_ENABLE_STABLEHLO ${CAKE_MLIR_ENABLE_STABLEHLO})
+    if(TORCH_MLIR_ENABLE_STABLEHLO)
+      add_definitions(-DTORCH_MLIR_ENABLE_STABLEHLO)
+    endif()
 
     ###############################################################################
     # Tablegen
@@ -56,7 +59,11 @@ if(CAKE_MLIR_ENABLE_TORCH_MLIR)
 
     # ConversionPasses.td
     set(LLVM_TARGET_DEFINITIONS ${TORCH_MLIR_ROOT_DIR}/include/torch-mlir/Conversion/Passes.td)
-    mlir_tablegen(include/torch-mlir/Conversion/Passes.h.inc -gen-pass-decls)
+    if(TORCH_MLIR_ENABLE_STABLEHLO)
+      mlir_tablegen(include/torch-mlir/Conversion/Passes.h.inc -gen-pass-decls -DTORCH_MLIR_ENABLE_STABLEHLO)
+      else()
+      mlir_tablegen(include/torch-mlir/Conversion/Passes.h.inc -gen-pass-decls)
+    endif()
     mlir_tablegen(include/torch-mlir/Conversion/Passes.capi.h.inc -gen-pass-capi-header)
     mlir_tablegen(include/torch-mlir/Conversion/Passes.capi.cpp.inc -gen-pass-capi-impl)
     add_public_tablegen_target(ConversionPassesGen)
@@ -147,18 +154,17 @@ if(CAKE_MLIR_ENABLE_TORCH_MLIR)
         TorchMLIRTorchDialect
     )
 
-    # There is a circular dependency on the conversion of stablehlo.
     # TorchMLIRTorchToStablehlo
-    # file(GLOB _TorchMLIRTorchToStablehlo_SRCS "${TORCH_MLIR_ROOT_DIR}/lib/Conversion/TorchToStablehlo/*.cpp")
-    # add_mlir_conversion_library(
-    #     TorchMLIRTorchToStablehlo
-    #     ${_TorchMLIRTorchToStablehlo_SRCS}
-    #     LINK_LIBS PUBLIC
-    #     ChloOps
-    #     StablehloOps
-    #     TorchMLIRTorchDialect
-    #     TorchMLIRConversionUtils
-    # )
+    file(GLOB _TorchMLIRTorchToStablehlo_SRCS "${TORCH_MLIR_ROOT_DIR}/lib/Conversion/TorchToStablehlo/*.cpp")
+    add_mlir_library(
+        TorchMLIRTorchToStablehlo
+        ${_TorchMLIRTorchToStablehlo_SRCS}
+        LINK_LIBS PUBLIC
+        ChloOps
+        StablehloOps
+        TorchMLIRTorchDialect
+        TorchMLIRConversionUtils
+    )
 
     # ConversionPasses
     # Torch to * dialects
@@ -173,13 +179,16 @@ if(CAKE_MLIR_ENABLE_TORCH_MLIR)
       "${TORCH_MLIR_ROOT_DIR}/lib/Conversion/Utils/*.cpp"
       "${TORCH_MLIR_ROOT_DIR}/lib/Dialect/TorchConversion/Transforms/*.cpp"
     )
+    set(CONVERSION_PASSES_LINK_LIBS)
     if(TORCH_MLIR_ENABLE_STABLEHLO)
-      list(APPEND _ConversionPasses_SRCS TorchMLIRTorchToStablehlo)
+      list(APPEND CONVERSION_PASSES_LINK_LIBS TorchMLIRTorchToStablehlo)
     endif()
     add_mlir_library(
         ConversionPasses
-        "${TORCH_MLIR_ROOT_DIR}/lib/Conversion/Passes.cpp"
         ${_ConversionPasses_SRCS}
+
+        LINK_LIBS PUBLIC
+        ${CONVERSION_PASSES_LINK_LIBS}
     )
 
     # TorchMLIRConversionPasses
