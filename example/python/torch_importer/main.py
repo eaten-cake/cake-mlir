@@ -2,11 +2,12 @@ import torch
 from torch import nn
 from torch.export import export
 
-from cake_mlir import ir, passmanager, execution_engine
+from cake_mlir import ir, passmanager, execution_engine, runtime
 from cake_mlir.extras import fx_importer 
 from cake_mlir.dialects import torch as torch_dialect
 
 import ctypes
+import numpy as np
 
 class TestModel(nn.Module):
 
@@ -33,8 +34,11 @@ torch_dialect.register_dialect(ctx)
 importer = fx_importer.FxImporter(context=ctx)
 
 module = importer.import_frozen_program(
-    exported_program
+    exported_program,
+    func_name="forward"
 )
+
+module.attributes["llvm.emit_c_interface"] = ir.UnitAttr.get(module.context)
 
 pipeline_str = """
     builtin.module(
@@ -47,7 +51,7 @@ pipeline_str = """
         convert-elementwise-to-linalg,
         convert-tensor-to-linalg,
 
-        one-shot-bufferize,
+        one-shot-bufferize{bufferize-function-boundaries},
         buffer-deallocation-pipeline,
 
         convert-linalg-to-affine-loops,
@@ -79,12 +83,17 @@ print(importer.module.body)
 
 # )
 
-# engine = execution_engine.ExecutionEngine(importer.module)
+engine = execution_engine.ExecutionEngine(importer.module)
 
-c_float32_p = ctypes.c_float * 10
+np_x = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(x.numpy())))
+res = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(np.zeros((1, 10), dtype=np.float32))))
 
-np_x = x.numpy()
+engine.invoke("forward", res, np_x)
 
-c_x = c_float32_p(*np_x.flatten())
+res_np = runtime.ranked_memref_to_numpy(res[0])
 
-# engine.invoke("forward", x)
+print(res_np)
+
+torch_res = model(x)
+
+print(torch_res)
