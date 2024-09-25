@@ -1,92 +1,70 @@
 import torch
 from torch import nn
+import torchvision
 from torch.export import export
 
-from cake_mlir import ir, passmanager, execution_engine, runtime
-from cake_mlir.extras import fx_importer 
-from cake_mlir.dialects import torch as torch_dialect
+from cake_mlir import passmanager, execution_engine, runtime, frontend
+from cake_mlir.extras import fx_importer
+from cake_mlir.dialects import torch as torch_dialect, math
+from cake_mlir.extras.fx_decomp_util import get_decomposition_table
 
 import ctypes
 import numpy as np
 
-class TestModel(nn.Module):
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.linear = nn.Linear(10, 10)
-    
-    def forward(self, x):
-        return self.linear(x)
-    
-model = TestModel()
+model = torchvision.models.resnet18(pretrained=True)
 model = model.eval()
 
-x = torch.randn(1, 10)
+x = torch.randn(1, 3, 224, 224)
 
-exported_program = export(
-    model,
-    args=(x,)
-)
+mod = frontend.from_torch(model, (x,))
 
-ctx = ir.Context()
-torch_dialect.register_dialect(ctx)
+# pipeline_str = """
+#     builtin.module(
+#         stablehlo-legalize-to-linalg,
 
-importer = fx_importer.FxImporter(context=ctx)
+#         canonicalize,
 
-module = importer.import_frozen_program(
-    exported_program,
-    func_name="forward"
-)
+#         convert-elementwise-to-linalg,
+#         convert-tensor-to-linalg,
 
-module.attributes["llvm.emit_c_interface"] = ir.UnitAttr.get(module.context)
+#         one-shot-bufferize{bufferize-function-boundaries},
+#         buffer-deallocation-pipeline,
+
+#         convert-linalg-to-affine-loops,
+#         lower-affine,
+
+#         expand-strided-metadata,
+
+#         convert-scf-to-cf,
+#         convert-cf-to-llvm,
+#         convert-math-to-llvm,
+#         convert-arith-to-llvm,
+#         convert-func-to-llvm,
+#         finalize-memref-to-llvm,
+#         reconcile-unrealized-casts
+
+#     )
+# """
 
 pipeline_str = """
     builtin.module(
-        torchdynamo-export-to-torch-backend-pipeline,
-        torch-backend-to-stablehlo-backend-pipeline,
-        stablehlo-legalize-to-linalg,
-
-        canonicalize,
-
-        convert-elementwise-to-linalg,
-        convert-tensor-to-linalg,
-
-        one-shot-bufferize{bufferize-function-boundaries},
-        buffer-deallocation-pipeline,
-
-        convert-linalg-to-affine-loops,
-        lower-affine,
-
-        expand-strided-metadata,
-
-        convert-scf-to-cf,
-        convert-cf-to-llvm,
-        convert-arith-to-llvm,
-        convert-func-to-llvm,
-        finalize-memref-to-llvm,
-        reconcile-unrealized-casts
+        stablehlo-legalize-to-linalg
 
     )
 """
 
-pm = passmanager.PassManager.parse(pipeline_str, ctx)
+pm = passmanager.PassManager.parse(pipeline_str, mod.context)
 
-pm.run(importer.module.operation)
+pm.run(mod.operation)
 
-importer.module.operation.print(
-    file=open("out.mlir", "w")
+mod.operation.print(
+    file=open("out.mlir", "w"),
 )
 
-print(importer.module.body)
-
-# importer.module.operation.print(
-
-# )
-
-engine = execution_engine.ExecutionEngine(importer.module)
+engine = execution_engine.ExecutionEngine(mod)
 
 np_x = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(x.numpy())))
-res = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(np.zeros((1, 10), dtype=np.float32))))
+res = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(np.zeros((1, 1000), dtype=np.float32))))
 
 engine.invoke("forward", res, np_x)
 
