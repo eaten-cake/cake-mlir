@@ -31,6 +31,17 @@ declare_mlir_python_sources(
   SOURCES
     frontend/__init__.py
     frontend/torch/torch_importer.py
+    frontend/onnx/onnx_importer.py
+)
+
+
+declare_mlir_python_sources(
+  CakeMLIRPythonSources.Transform
+  ADD_TO_PARENT CakeMLIRPythonSources
+  ROOT_DIR "${CakeMLIR_SOURCE_DIR}/python/cake_mlir"
+  SOURCES
+    transform/__init__.py
+    transform/transform.py
 )
 
 # declare_mlir_dialect_python_bindings(
@@ -88,6 +99,7 @@ set(_source_components
   MLIRPythonExtension.RegisterEverything
 
   CakeMLIRPythonSources.Frontend
+  CakeMLIRPythonSources.Transform
   CakeMLIRPythonSources.Torch.Importers
   CakeMLIRPythonSources.Torch.Dialects
   CakeMLIRPythonExtension.Torch.Main

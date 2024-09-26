@@ -18,6 +18,12 @@ x = torch.randn(1, 3, 224, 224)
 
 mod = frontend.from_torch(model, (x,))
 
+mod.operation.print(
+    file=open("out.mlir", "w"),
+)
+
+exit(0)
+
 # pipeline_str = """
 #     builtin.module(
 #         stablehlo-legalize-to-linalg,
@@ -48,8 +54,26 @@ mod = frontend.from_torch(model, (x,))
 
 pipeline_str = """
     builtin.module(
-        stablehlo-legalize-to-linalg
+        stablehlo-legalize-to-linalg,
 
+        canonicalize,
+        convert-elementwise-to-linalg,
+        convert-tensor-to-linalg,
+
+        one-shot-bufferize{bufferize-function-boundaries},
+        buffer-deallocation-pipeline,
+
+        convert-linalg-to-affine-loops,
+        lower-affine,
+
+        expand-strided-metadata,
+
+        convert-scf-to-cf,
+        convert-cf-to-llvm,
+        convert-math-to-llvm,
+        convert-arith-to-llvm,
+        convert-func-to-llvm,
+        finalize-memref-to-llvm
     )
 """
 
@@ -60,6 +84,8 @@ pm.run(mod.operation)
 mod.operation.print(
     file=open("out.mlir", "w"),
 )
+
+exit(0)
 
 engine = execution_engine.ExecutionEngine(mod)
 

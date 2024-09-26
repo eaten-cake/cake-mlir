@@ -31,12 +31,6 @@ def from_torch(
         func_name="forward"
     )
 
-    operation.print(
-        file=open("torch_imported.mlir", "w"),
-    )
-
-    exit(0)
-
     operation.attributes["llvm.emit_c_interface"] = UnitAttr.get(operation.context)
     
     pipeline_str = """
