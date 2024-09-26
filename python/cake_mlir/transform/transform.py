@@ -7,25 +7,25 @@ def lowering_to_llvm(module : Module) -> Module:
         "stablehlo-legalize-to-linalg",
         "convert-shape-to-std",
 
-        # "canonicalize",
-        # "convert-elementwise-to-linalg",
-        # "convert-tensor-to-linalg",
+        "canonicalize",
+        "convert-elementwise-to-linalg",
+        "convert-tensor-to-linalg",
 
-        # "one-shot-bufferize{bufferize-function-boundaries}",
-        # "buffer-deallocation-pipeline",
+        "one-shot-bufferize{bufferize-function-boundaries}",
+        "buffer-deallocation-pipeline",
 
-        # "convert-linalg-to-affine-loops",
-        # "lower-affine",
+        "convert-linalg-to-affine-loops",
+        "lower-affine",
 
-        # "expand-strided-metadata",
+        "expand-strided-metadata",
 
-        # "convert-scf-to-cf",
-        # "convert-cf-to-llvm",
-        # "convert-math-to-llvm",
-        # "convert-arith-to-llvm",
-        # "convert-func-to-llvm",
-        # "finalize-memref-to-llvm",
-        # "reconcile-unrealized-casts",
+        "convert-scf-to-cf",
+        "convert-cf-to-llvm",
+        "convert-math-to-llvm",
+        "convert-arith-to-llvm",
+        "convert-func-to-llvm",
+        "finalize-memref-to-llvm",
+        "reconcile-unrealized-casts",
     ]
 
     pipeline_str = "builtin.module(" + ",".join(passes) + ")"
