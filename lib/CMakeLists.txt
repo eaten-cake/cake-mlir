@@ -1,4 +1,5 @@
 add_subdirectory(Dialect)
+add_subdirectory(Transform)
 
 get_property(dialect_libs GLOBAL PROPERTY MLIR_DIALECT_LIBS)
 get_property(conversion_libs GLOBAL PROPERTY MLIR_CONVERSION_LIBS)

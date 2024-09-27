@@ -1,10 +1,13 @@
 from cake_mlir import passmanager
 from cake_mlir.ir import Module
 
+def sequential(passes : list) -> str:
+    return "builtin.module(" + ",".join(passes) + ")"
+
 def lowering_to_llvm(module : Module) -> Module:
 
     passes = [
-        "stablehlo-legalize-to-linalg",
+        # "stablehlo-legalize-to-linalg",
         "convert-shape-to-std",
 
         "canonicalize",
@@ -28,7 +31,7 @@ def lowering_to_llvm(module : Module) -> Module:
         "reconcile-unrealized-casts",
     ]
 
-    pipeline_str = "builtin.module(" + ",".join(passes) + ")"
+    pipeline_str = sequential(passes)
 
     with module.context as ctx:
         pm = passmanager.PassManager.parse(pipeline_str)

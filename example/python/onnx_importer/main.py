@@ -47,8 +47,8 @@ module.operation.print(
     file=open("out.mlir", "w")
 )
 
-module = transform.lowering_to_llvm(module)
+# module = transform.lowering_to_llvm(module)
 
-module.operation.print(
-    file=open("out.mlir", "w")
-)
+# module.operation.print(
+#     file=open("out.mlir", "w")
+# )

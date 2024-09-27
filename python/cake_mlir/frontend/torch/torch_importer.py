@@ -3,6 +3,7 @@ from cake_mlir.extras.fx_decomp_util import get_decomposition_table
 from cake_mlir.ir import Context, UnitAttr, Module
 from cake_mlir.passmanager import PassManager
 from cake_mlir.dialects import torch as torch_dialect
+from ... import transform
 
 import torch
 
@@ -33,12 +34,13 @@ def from_torch(
 
     operation.attributes["llvm.emit_c_interface"] = UnitAttr.get(operation.context)
     
-    pipeline_str = """
-        builtin.module(
-            torchdynamo-export-to-torch-backend-pipeline,
-            torch-backend-to-stablehlo-backend-pipeline
-        )
-    """
+    passes = [
+        "torchdynamo-export-to-torch-backend-pipeline",
+        "torch-backend-to-linalg-on-tensors-backend-pipeline",
+        # "torch-backend-to-stablehlo-backend-pipeline",
+    ]
+
+    pipeline_str = transform.sequential(passes)
 
     pm = PassManager.parse(pipeline_str, ctx)
     pm.run(importer.module.operation)

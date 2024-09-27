@@ -20,6 +20,8 @@ input = torch.randn(1, 3, 224, 224)
 
 # module = frontend.from_torch(model, (input,))
 
+# print(module)
+
 torch.onnx.export(model, input, "batch_norm.onnx", opset_version=17)
 
 model_proto = onnx.load("batch_norm.onnx")

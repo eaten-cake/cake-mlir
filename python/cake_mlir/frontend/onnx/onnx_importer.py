@@ -4,6 +4,7 @@ from cake_mlir.extras import onnx_importer as ONNXImporter
 from cake_mlir.dialects import torch as torch_dialect
 from cake_mlir.ir import Module, Context, UnitAttr
 from cake_mlir import passmanager
+from ... import transform
 
 def from_onnx(
         model : onnx.ModelProto,
@@ -19,13 +20,23 @@ def from_onnx(
     importer = ONNXImporter.NodeImporter.define_function(model_info.main_graph, module.operation)
     importer.import_all()
 
-    pipeline_str = """
-        builtin.module(
-            inline, func.func(convert-torch-onnx-to-torch),
-            torchdynamo-export-to-torch-backend-pipeline,
-            torch-backend-to-stablehlo-backend-pipeline
-        )
-    """
+    backend_legal_ops = [
+        "aten.flatten.using_ints",
+        "aten.adaptive_avg_pool1d",
+        "aten.unflatten.int",
+    ]
+    option_string = "{backend-legal-ops=" + ",".join(backend_legal_ops) + "}"
+
+    passes = [
+        "func.func(convert-torch-onnx-to-torch)",
+        "torchdynamo-export-to-torch-backend-pipeline",
+        f"torch-lower-to-backend-contract{option_string}",
+        "torch-simplification-pipeline",
+        "torch-backend-to-linalg-on-tensors-backend-pipeline"
+        # "torch-backend-to-stablehlo-backend-pipeline",
+    ]
+
+    pipeline_str = transform.sequential(passes)
 
     with ctx:
         pm = passmanager.PassManager.parse(pipeline_str)
