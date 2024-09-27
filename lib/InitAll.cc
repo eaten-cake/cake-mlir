@@ -1,6 +1,8 @@
 #include "cake-mlir/InitAll.h"
 #include "cake-mlir/Dialect/Cake/CakeDialect.h"
 
+#include "cake-mlir/Transform/learn/learn.h"
+
 #ifdef CAKE_MLIR_ENABLE_STABLEHLO
 #include "stablehlo/conversions/linalg/transforms/Passes.h"
 #include "stablehlo/transforms/Passes.h"
@@ -43,6 +45,9 @@ void registerOptionalInputDialects(mlir::DialectRegistry &registry) {
 }
 
 void registerAllPasses() {
+
+    // Register the LearnPass
+    mlir::cake::registerLearnPass();
     
     mlir::registerAllPasses();
 

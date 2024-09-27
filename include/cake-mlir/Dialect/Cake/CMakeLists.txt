@@ -8,9 +8,3 @@ mlir_tablegen(CakeOps.h.inc -gen-op-decls)
 mlir_tablegen(CakeOps.cpp.inc -gen-op-defs)
 add_public_tablegen_target(CakeDialectOpsIncGen)
 
-# set global var
-get_property(all_targets GLOBAL PROPERTY ALL_TABLEGEN_TARGETS)
-list(APPEND all_targets CakeDialectIncGen)
-list(APPEND all_targets CakeDialectOpsIncGen)
-set_property(GLOBAL PROPERTY ALL_TABLEGEN_TARGETS ${all_targets})
-

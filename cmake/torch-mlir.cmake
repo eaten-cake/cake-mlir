@@ -155,16 +155,18 @@ if(CAKE_MLIR_ENABLE_TORCH_MLIR)
     )
 
     # TorchMLIRTorchToStablehlo
-    file(GLOB _TorchMLIRTorchToStablehlo_SRCS "${TORCH_MLIR_ROOT_DIR}/lib/Conversion/TorchToStablehlo/*.cpp")
-    add_mlir_library(
-        TorchMLIRTorchToStablehlo
-        ${_TorchMLIRTorchToStablehlo_SRCS}
-        LINK_LIBS PUBLIC
-        ChloOps
-        StablehloOps
-        TorchMLIRTorchDialect
-        TorchMLIRConversionUtils
-    )
+    if(TORCH_MLIR_ENABLE_STABLEHLO)
+      file(GLOB _TorchMLIRTorchToStablehlo_SRCS "${TORCH_MLIR_ROOT_DIR}/lib/Conversion/TorchToStablehlo/*.cpp")
+      add_mlir_library(
+          TorchMLIRTorchToStablehlo
+          ${_TorchMLIRTorchToStablehlo_SRCS}
+          LINK_LIBS PUBLIC
+          ChloOps
+          StablehloOps
+          TorchMLIRTorchDialect
+          TorchMLIRConversionUtils
+      )
+    endif()
 
     # ConversionPasses
     # Torch to * dialects

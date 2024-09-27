@@ -32,6 +32,3 @@ if(MLIR_ENABLE_BINDINGS_PYTHON)
   message(STATUS "Enabling Python API")
   add_subdirectory(python)
 endif()
-
-# use custom target
-include(cmake/targets.cmake)

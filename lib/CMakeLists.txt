@@ -8,6 +8,7 @@ set(
     LinkedLibs
 
     CakeDialect
+    CakeMLIRLearnPass
 
     TorchMLIRInitAll
     
