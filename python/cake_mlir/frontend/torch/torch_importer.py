@@ -36,8 +36,7 @@ def from_torch(
     
     passes = [
         "torchdynamo-export-to-torch-backend-pipeline",
-        "torch-backend-to-linalg-on-tensors-backend-pipeline",
-        # "torch-backend-to-stablehlo-backend-pipeline",
+        "torch-backend-to-tosa-backend-pipeline",
     ]
 
     pipeline_str = transform.sequential(passes)

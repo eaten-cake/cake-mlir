@@ -7,7 +7,19 @@ def sequential(passes : list) -> str:
 def lowering_to_llvm(module : Module) -> Module:
 
     passes = [
-        # "stablehlo-legalize-to-linalg",
+        # convert tosa to linalg on tensors
+        "canonicalize",
+        "func.func(tosa-infer-shapes)",
+        "func.func(tosa-make-broadcastable)",
+        "func.func(tosa-to-linalg-named)",
+        "canonicalize",
+        "func.func(tosa-layerwise-constant-fold)",
+        "func.func(tosa-make-broadcastable)",
+        "func.func(tosa-to-linalg)",
+
+        "func.func(tosa-to-tensor)",
+        "func.func(tosa-to-arith)",
+        # convert linalg to llvm
         "convert-shape-to-std",
 
         "canonicalize",

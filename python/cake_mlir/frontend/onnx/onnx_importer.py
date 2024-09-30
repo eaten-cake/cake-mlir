@@ -16,9 +16,9 @@ def from_onnx(
     model_info = ONNXImporter.ModelInfo(model_proto)
 
     module = model_info.create_module(ctx)
-    module.operation.attributes["llvm.emit_c_interface"] = UnitAttr.get(ctx)
     importer = ONNXImporter.NodeImporter.define_function(model_info.main_graph, module.operation)
     importer.import_all()
+    module.operation.regions[0].blocks[0].operations[0].attributes["llvm.emit_c_interface"] = UnitAttr.get(ctx)
 
     backend_legal_ops = [
         "aten.flatten.using_ints",
@@ -29,11 +29,9 @@ def from_onnx(
 
     passes = [
         "func.func(convert-torch-onnx-to-torch)",
-        "torchdynamo-export-to-torch-backend-pipeline",
         f"torch-lower-to-backend-contract{option_string}",
         "torch-simplification-pipeline",
-        "torch-backend-to-linalg-on-tensors-backend-pipeline"
-        # "torch-backend-to-stablehlo-backend-pipeline",
+        "torch-backend-to-tosa-backend-pipeline",
     ]
 
     pipeline_str = transform.sequential(passes)

@@ -7,6 +7,7 @@ from cake_mlir import passmanager, execution_engine, runtime, frontend
 from cake_mlir.extras import fx_importer
 from cake_mlir.dialects import torch as torch_dialect, math
 from cake_mlir.extras.fx_decomp_util import get_decomposition_table
+from cake_mlir.transform import lowering_to_llvm 
 
 import ctypes
 import numpy as np
@@ -18,68 +19,7 @@ x = torch.randn(1, 3, 224, 224)
 
 mod = frontend.from_torch(model, (x,))
 
-mod.operation.print(
-    file=open("out.mlir", "w"),
-)
-
-exit(0)
-
-# pipeline_str = """
-#     builtin.module(
-#         stablehlo-legalize-to-linalg,
-
-#         canonicalize,
-
-#         convert-elementwise-to-linalg,
-#         convert-tensor-to-linalg,
-
-#         one-shot-bufferize{bufferize-function-boundaries},
-#         buffer-deallocation-pipeline,
-
-#         convert-linalg-to-affine-loops,
-#         lower-affine,
-
-#         expand-strided-metadata,
-
-#         convert-scf-to-cf,
-#         convert-cf-to-llvm,
-#         convert-math-to-llvm,
-#         convert-arith-to-llvm,
-#         convert-func-to-llvm,
-#         finalize-memref-to-llvm,
-#         reconcile-unrealized-casts
-
-#     )
-# """
-
-pipeline_str = """
-    builtin.module(
-        stablehlo-legalize-to-linalg,
-
-        canonicalize,
-        convert-elementwise-to-linalg,
-        convert-tensor-to-linalg,
-
-        one-shot-bufferize{bufferize-function-boundaries},
-        buffer-deallocation-pipeline,
-
-        convert-linalg-to-affine-loops,
-        lower-affine,
-
-        expand-strided-metadata,
-
-        convert-scf-to-cf,
-        convert-cf-to-llvm,
-        convert-math-to-llvm,
-        convert-arith-to-llvm,
-        convert-func-to-llvm,
-        finalize-memref-to-llvm
-    )
-"""
-
-pm = passmanager.PassManager.parse(pipeline_str, mod.context)
-
-pm.run(mod.operation)
+mod = lowering_to_llvm(mod)
 
 mod.operation.print(
     file=open("out.mlir", "w"),
