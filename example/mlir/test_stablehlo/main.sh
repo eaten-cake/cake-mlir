@@ -1,0 +1,1 @@
+cake-opt --stablehlo-legalize-to-linalg main.mlir

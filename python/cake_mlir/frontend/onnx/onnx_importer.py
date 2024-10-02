@@ -29,9 +29,12 @@ def from_onnx(
 
     passes = [
         "func.func(convert-torch-onnx-to-torch)",
-        f"torch-lower-to-backend-contract{option_string}",
-        "torch-simplification-pipeline",
+        # "func.func(convert-torch-to-tensor)",
+        # "func.func(convert-torch-to-arith)",
+        # f"torch-lower-to-backend-contract{option_string}",
+        # "torch-simplification-pipeline",
         "torch-backend-to-tosa-backend-pipeline",
+        # "func.func(convert-torch-to-tosa)",
     ]
 
     pipeline_str = transform.sequential(passes)

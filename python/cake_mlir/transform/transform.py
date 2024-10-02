@@ -30,9 +30,9 @@ def lowering_to_llvm(module : Module) -> Module:
         "buffer-deallocation-pipeline",
 
         "convert-linalg-to-affine-loops",
-        "lower-affine",
 
         "expand-strided-metadata",
+        "lower-affine",
 
         "convert-scf-to-cf",
         "convert-cf-to-llvm",

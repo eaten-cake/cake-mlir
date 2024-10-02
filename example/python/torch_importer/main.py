@@ -2,6 +2,7 @@ import torch
 from torch import nn
 import torchvision
 from torch.export import export
+import torch.utils._pytree as pytree
 
 from cake_mlir import passmanager, execution_engine, runtime, frontend
 from cake_mlir.extras import fx_importer
@@ -21,23 +22,27 @@ mod = frontend.from_torch(model, (x,))
 
 mod = lowering_to_llvm(mod)
 
-mod.operation.print(
-    file=open("out.mlir", "w"),
-)
+# mod.operation.print(
+#     file=open("out.mlir", "w")
+# )
 
-exit(0)
+buffers = model.named_buffers(remove_duplicate=False)
+
+params = {
+    **dict(buffers)
+}
+params_flat, params_spec = pytree.tree_flatten(params)
+params_flat = list(params_flat)
 
 engine = execution_engine.ExecutionEngine(mod)
 
-np_x = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(x.numpy())))
-res = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(np.zeros((1, 1000), dtype=np.float32))))
+with torch.no_grad():
+    numpy_inputs = [o.numpy() for o in params_flat]
 
-engine.invoke("forward", res, np_x)
+numpy_inputs.append(x.numpy())
 
-res_np = runtime.ranked_memref_to_numpy(res[0])
 
-print(res_np)
 
-torch_res = model(x)
+torch_result = model(x)
 
-print(torch_res)
+print(torch_result.shape)
