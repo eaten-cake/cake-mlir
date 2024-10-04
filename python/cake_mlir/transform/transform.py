@@ -1,6 +1,26 @@
 from cake_mlir import passmanager
 from cake_mlir.ir import Module
 
+TOSA_TO_LINALG_PASS = ",".join(
+    [
+        # TOSA legalization may emit tosa.const() ops. These are legalized
+        # by tosa-to-arith to arith.constants. This mechanical transformation
+        # must be done prior to TOSA-to-LinAlg so that the latter does not fail.
+        # This is an artifact of legalizations spread across a collection of simple
+        # ones in TOSA-to-Standard and the main conversions TOSA-to-LinAlg,
+        # that depend on TOSA as well as TOSA-to-Standard.
+        "tosa-to-arith",
+        "tosa-to-scf",
+        # Named ops must be legalized prior to general tosa-to-linalg
+        "tosa-to-linalg-named",
+        # TOSA-to-LinAlg may generate tosa.const() ops, so we want to lower them
+        # to arith.constants here before proceeding further.
+        "tosa-to-linalg",
+        "tosa-to-tensor",
+        "tosa-to-arith",
+    ]
+)
+
 def sequential(passes : list) -> str:
     return "builtin.module(" + ",".join(passes) + ")"
 
