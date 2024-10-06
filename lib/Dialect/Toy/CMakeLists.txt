@@ -6,4 +6,5 @@ add_mlir_dialect_library(
     DEPENDS
     ToyDialectIncGen
     ToyDialectOpsIncGen
+    ToyCanonicalizeIncGen
 )

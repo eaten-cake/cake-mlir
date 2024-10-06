@@ -13,6 +13,7 @@
 #include "mlir/IR/Diagnostics.h"
 #include "toy/AST.h"
 #include "cake-mlir/Dialect/Toy/ToyDialect.h"
+#include "cake-mlir/Dialect/Toy/ToyOps.h"
 #include "toy/Lexer.h"
 #include "toy/MLIRGen.h"
 #include "toy/Parser.h"

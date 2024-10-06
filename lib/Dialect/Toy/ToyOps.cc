@@ -16,8 +16,12 @@
 #include <algorithm>
 #include <string>
 
+#include "mlir/IR/PatternMatch.h"
+
 namespace mlir {
 namespace toy {
+
+#include "cake-mlir/Dialect/Toy/ToyCanonicalize.cpp.inc"
 
 //===----------------------------------------------------------------------===//
 // Toy Operations
@@ -284,6 +288,21 @@ llvm::LogicalResult TransposeOp::verify() {
            << "expected result shape to be a transpose of the input";
   }
   return mlir::success();
+}
+
+/// Register our patterns as "canonicalization" patterns on the TransposeOp so
+/// that they can be picked up by the Canonicalization framework.
+void TransposeOp::getCanonicalizationPatterns(RewritePatternSet &results,
+                                              MLIRContext *context) {
+  results.add<TransposeTransposeOptPattern>(context);
+}
+
+/// Register our patterns as "canonicalization" patterns on the ReshapeOp so
+/// that they can be picked up by the Canonicalization framework.
+void ReshapeOp::getCanonicalizationPatterns(RewritePatternSet &results,
+                                            MLIRContext *context) {
+  results.add<ReshapeReshapeOptPattern, RedundantReshapeOptPattern,
+              FoldConstantReshapeOptPattern>(context);
 }
 
 } // namespace toy
