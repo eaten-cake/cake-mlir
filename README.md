@@ -1,4 +1,6 @@
-## e2e AI compiler
+## Cake-MLIR
+
+用于学习用的MLIR项目，主要面向AI模型的端到端编译，目前仅支持Pytorch
 
 ### 快速开始
 

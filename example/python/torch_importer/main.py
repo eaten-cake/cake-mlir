@@ -14,6 +14,18 @@ from cake_mlir import runtime
 import ctypes
 import numpy as np
 
+import time
+import subprocess
+
+def lowering_to_llvmir(mod = None):
+    command = "echo 'Hello, World!'"
+    result = subprocess.run(command, shell=True, text=True, capture_output=True)
+    
+
+lowering_to_llvmir()
+
+exit(0)
+
 class CustomModel(nn.Module):
 
     def __init__(self):
@@ -29,17 +41,13 @@ class CustomModel(nn.Module):
         x = self.fc1(x)
         return x
 
-# model = torchvision.models.resnet18()
-# model = model.eval()
-
-model = CustomModel()
+model = torchvision.models.resnet18()
 model = model.eval()
 
+# model = CustomModel()
+# model = model.eval()
+
 x = torch.randn(1, 3, 224, 224)
-
-y = model(x)
-
-print(y.shape)
 
 mod = frontend.from_torch(model, (x,))
 
@@ -74,20 +82,34 @@ ffi_args = []
 
 res = np.zeros((1, 1000), dtype=np.float32)
 
-res_c = ctypes.pointer(ctypes.pointer(runtime.get_unranked_memref_descriptor(res)))
+res_c = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(res)))
 
-x_c = ctypes.pointer(ctypes.pointer(runtime.get_unranked_memref_descriptor(x.numpy())))
+x_c = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(x.numpy())))
 
-ffi_args.append(ctypes.pointer(ctypes.pointer(runtime.get_unranked_memref_descriptor(res))))
+ffi_args.append(res_c)
 
 for arg in numpy_inputs:
-    input = ctypes.pointer(ctypes.pointer(runtime.get_unranked_memref_descriptor(arg)))
+    input = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(arg)))
     ffi_args.append(input)
 
-engine.invoke("forward", res_c, x_c)
+start_time = time.time()
+engine.invoke("forward", *ffi_args)
+end_time = time.time()
 
-# print(res)
+print("mlir runtime : %fs" % (end_time - start_time))
 
+res_numpy = runtime.ranked_memref_to_numpy(res_c[0])
+
+start_time = time.time()
 torch_result = model(x)
+end_time = time.time()
 
-print(torch_result.shape)
+print("torch runtime : %fs" % (end_time - start_time))
+
+with torch.no_grad():
+    if np.allclose(res_numpy, torch_result.numpy(), atol=1e-5):
+        print("Results match!")
+    else:
+        print("Results don't match!")
+
+

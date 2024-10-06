@@ -1,0 +1,9 @@
+#ifndef CAKE_MLIR_DIALECT_TOY_TOYPATTERNS
+#define CAKE_MLIR_DIALECT_TOY_TOYPATTERNS
+
+include "mlir/IR/PatternBase.td"
+include "ToyOps.td"
+
+
+
+#endif // CAKE_MLIR_DIALECT_TOY_TOYPATTERNS
