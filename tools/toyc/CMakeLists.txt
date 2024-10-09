@@ -6,6 +6,7 @@ target_link_libraries(
 
     toy_parser
     ToyDialect
+    ToyPasses
 
     MLIRPass
     MLIRTransforms

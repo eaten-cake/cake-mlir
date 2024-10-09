@@ -8,3 +8,10 @@ add_mlir_dialect_library(
     ToyDialectOpsIncGen
     ToyCanonicalizeIncGen
 )
+
+target_link_libraries(
+    ToyDialect
+    PRIVATE
+    
+    MLIRCastInterfaces
+)

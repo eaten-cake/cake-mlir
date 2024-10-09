@@ -39,6 +39,7 @@ def RedundantReshapeOptPattern : Pat<
   (ReshapeOp:$res $arg), (replaceWithValue $arg),
   [(TypesAreIdentical $res, $arg)]>;
 
+// Transpose(Transpose(x)) = x
 def TransposeTransposeOptPattern : Pat<
   (TransposeOp(TransposeOp $arg)),
   (replaceWithValue $arg)

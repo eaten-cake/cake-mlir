@@ -163,6 +163,25 @@ mlir::ParseResult AddOp::parse(mlir::OpAsmParser &parser,
 void AddOp::print(mlir::OpAsmPrinter &p) { printBinaryOp(p, *this); }
 
 //===----------------------------------------------------------------------===//
+// CastOp
+//===----------------------------------------------------------------------===//
+
+/// Returns true if the given set of input and result types are compatible with
+/// this cast operation. This is required by the `CastOpInterface` to verify
+/// this operation and provide other additional utilities.
+bool CastOp::areCastCompatible(TypeRange inputs, TypeRange outputs) {
+  if (inputs.size() != 1 || outputs.size() != 1)
+    return false;
+  // The inputs must be Tensors with the same element type.
+  TensorType input = llvm::dyn_cast<TensorType>(inputs.front());
+  TensorType output = llvm::dyn_cast<TensorType>(outputs.front());
+  if (!input || !output || input.getElementType() != output.getElementType())
+    return false;
+  // The shape is required to match if both types are ranked.
+  return !input.hasRank() || !output.hasRank() || input == output;
+}
+
+//===----------------------------------------------------------------------===//
 // GenericCallOp
 //===----------------------------------------------------------------------===//
 
@@ -173,6 +192,28 @@ void GenericCallOp::build(mlir::OpBuilder &builder, mlir::OperationState &state,
   state.addOperands(arguments);
   state.addAttribute("callee",
                      mlir::SymbolRefAttr::get(builder.getContext(), callee));
+}
+
+/// Return the callee of the generic call operation, this is required by the
+/// call interface.
+CallInterfaceCallable GenericCallOp::getCallableForCallee() {
+  return (*this)->getAttrOfType<SymbolRefAttr>("callee");
+}
+
+/// Set the callee for the generic call operation, this is required by the call
+/// interface.
+void GenericCallOp::setCalleeFromCallable(CallInterfaceCallable callee) {
+  (*this)->setAttr("callee", callee.get<SymbolRefAttr>());
+}
+
+/// Get the argument operands to the called function, this is required by the
+/// call interface.
+Operation::operand_range GenericCallOp::getArgOperands() { return getInputs(); }
+
+/// Get the argument operands to the called function as a mutable range, this is
+/// required by the call interface.
+MutableOperandRange GenericCallOp::getArgOperandsMutable() {
+  return getInputsMutable();
 }
 
 //===----------------------------------------------------------------------===//

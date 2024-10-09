@@ -11,3 +11,8 @@ add_public_tablegen_target(ToyDialectOpsIncGen)
 set(LLVM_TARGET_DEFINITIONS ToyPatterns.td)
 mlir_tablegen(ToyCanonicalize.cpp.inc -gen-rewriters)
 add_public_tablegen_target(ToyCanonicalizeIncGen)
+
+set(LLVM_TARGET_DEFINITIONS ToyInterface.td)
+mlir_tablegen(ToyInterface.h.inc -gen-op-interface-decls)
+mlir_tablegen(ToyInterface.cpp.inc -gen-op-interface-defs)
+add_public_tablegen_target(ToyDialectOpsIncGen)
