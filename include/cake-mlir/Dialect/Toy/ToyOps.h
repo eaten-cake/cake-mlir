@@ -10,6 +10,8 @@
 #include "mlir/Interfaces/SideEffectInterfaces.h"
 #include "mlir/IR/OpDefinition.h"
 
+#include "ToyInterface.h"
+
 #define GET_OP_CLASSES
 #include "cake-mlir/Dialect/Toy/ToyOps.h.inc"
 

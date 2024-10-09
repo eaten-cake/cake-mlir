@@ -8,6 +8,7 @@ include "mlir/Interfaces/CastInterfaces.td"
 include "mlir/Interfaces/CallInterfaces.td"
 
 include "ToyDialect.td"
+include "ToyInterface.td"
 
 // Base class for toy dialect operations. This operation inherits from the base
 // `Op` class in OpBase.td, and provides:

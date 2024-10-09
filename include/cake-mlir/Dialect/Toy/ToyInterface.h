@@ -1,6 +1,6 @@
 #ifndef CAKE_MLIR_DIALECT_TOY_TOYINTERFACE_H_
 #define CAKE_MLIR_DIALECT_TOY_TOYINTERFACE_H_
 
-
+#include "cake-mlir/Dialect/Toy/ToyInterface.h.inc"
 
 #endif // CAKE_MLIR_DIALECT_TOY_TOYINTERFACE_H_

@@ -4,6 +4,7 @@
 #include "mlir/Pass/Pass.h"
 
 #include "cake-mlir/Dialect/Toy/ToyDialect.h"
+#include "cake-mlir/Dialect/Toy/ToyInterface.h"
 
 namespace mlir {
 namespace toy {
