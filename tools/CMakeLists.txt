@@ -1,4 +1,6 @@
 add_subdirectory(cake-mlir)
 add_subdirectory(cake-opt)
 add_subdirectory(cake-translate)
-add_subdirectory(toyc)
+if(CAKE_MLIR_ENABLE_TOY)
+    add_subdirectory(toyc)
+endif()

@@ -1,2 +1,4 @@
 add_subdirectory(learn)
-add_subdirectory(Toy)
+if(CAKE_MLIR_ENABLE_TOY)
+    add_subdirectory(Toy)
+endif()

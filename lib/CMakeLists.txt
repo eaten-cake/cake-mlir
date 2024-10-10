@@ -1,6 +1,9 @@
 add_subdirectory(Dialect)
 add_subdirectory(Transform)
-add_subdirectory(toy_parser)
+add_subdirectory(Conversion)
+if(CAKE_MLIR_ENABLE_TOY)
+    add_subdirectory(toy_parser)
+endif()
 
 get_property(dialect_libs GLOBAL PROPERTY MLIR_DIALECT_LIBS)
 get_property(conversion_libs GLOBAL PROPERTY MLIR_CONVERSION_LIBS)

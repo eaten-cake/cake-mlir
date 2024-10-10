@@ -27,8 +27,6 @@ cmake .. -G Ninja \
     -DPython3_EXECUTABLE=$PYTHON_EXECUTABLE \
     -DMLIR_DIR="$LLVM_INSTALL_DIR/lib/cmake/mlir/" \
     -DLLVM_DIR="$LLVM_INSTALL_DIR/lib/cmake/llvm/" \
-    -DCAKE_MLIR_ENABLE_LLD=ON \
-    -DCAKE_MLIR_ENABLE_CCACHE=ON \
     -DCMAKE_BUILD_TYPE=Debug \
 
 ninja -j4

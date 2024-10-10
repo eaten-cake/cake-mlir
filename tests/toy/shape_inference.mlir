@@ -19,7 +19,7 @@ toy.func @main() {
   toy.return
 }
 
-// CHECK-NOT: toy.func private @multiply_transpose
+// CHECK-NOT: toy.func @multiply_transpose
 // CHECK-NOT: tensor<*xf64>
 
 // CHECK-LABEL: toy.func @main()
