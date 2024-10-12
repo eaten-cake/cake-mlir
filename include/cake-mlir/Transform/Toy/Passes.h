@@ -8,13 +8,14 @@
 
 namespace mlir {
 namespace toy {
-
+namespace transform {
 #define GEN_PASS_DECL
 #include "cake-mlir/Transform/Toy/Passes.h.inc"
 
 #define GEN_PASS_REGISTRATION
 #include "cake-mlir/Transform/Toy/Passes.h.inc"
 
+} // namespace transform
 } // namespace toy
 } // namespace mlir
 

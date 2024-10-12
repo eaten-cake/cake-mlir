@@ -1,9 +1,16 @@
 #include "cake-mlir/Dialect/Toy/ToyDialect.h"
 #include "cake-mlir/Dialect/Toy/ToyOps.h"
+#include "cake-mlir/Dialect/Toy/ToyTypes.h"
+
+#include "llvm/ADT/TypeSwitch.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "mlir/IR/Builders.h"
 
 #include "cake-mlir/Dialect/Toy/ToyDialect.cpp.inc"
 #define GET_OP_CLASSES
 #include "cake-mlir/Dialect/Toy/ToyOps.cpp.inc"
+#define GET_TYPEDEF_CLASSES
+#include "cake-mlir/Dialect/Toy/ToyTypes.cpp.inc"
 
 namespace mlir {
 namespace toy {
@@ -66,6 +73,12 @@ struct ToyInlinerInterface : public DialectInlinerInterface {
 };
 
 void ToyDialect::initialize() {
+
+    addTypes<
+#define GET_TYPEDEF_LIST
+#include "cake-mlir/Dialect/Toy/ToyTypes.cpp.inc"
+    >();
+
     addOperations<
 #define GET_OP_LIST
 #include "cake-mlir/Dialect/Toy/ToyOps.cpp.inc"

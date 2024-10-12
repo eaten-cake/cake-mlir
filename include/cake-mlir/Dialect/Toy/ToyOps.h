@@ -11,6 +11,8 @@
 #include "mlir/IR/OpDefinition.h"
 
 #include "ToyInterface.h"
+#include "ToyDialect.h"
+#include "ToyTypes.h"
 
 #define GET_OP_CLASSES
 #include "cake-mlir/Dialect/Toy/ToyOps.h.inc"

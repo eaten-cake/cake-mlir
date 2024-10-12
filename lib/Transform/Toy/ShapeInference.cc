@@ -2,6 +2,7 @@
 
 namespace mlir {
 namespace toy {
+namespace transform {
 
 #define GEN_PASS_DEF_TOYSHAPEINFERENCEPASS
 #include "cake-mlir/Transform/Toy/Passes.h.inc"
@@ -84,5 +85,6 @@ struct ToyShapeInference : impl::ToyShapeInferencePassBase<ToyShapeInference> {
 
 };
 
+} // namespace transform
 } // namespace toy
 } // namespace mlir

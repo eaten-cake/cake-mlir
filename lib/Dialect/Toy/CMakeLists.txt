@@ -8,6 +8,7 @@ add_mlir_dialect_library(
     ToyDialectOpsIncGen
     ToyCanonicalizeIncGen
     ToyInterfaceIncGen
+    ToyTypesIncGen
 )
 
 target_link_libraries(

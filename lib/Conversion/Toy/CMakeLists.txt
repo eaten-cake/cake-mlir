@@ -1,8 +1,9 @@
 add_mlir_library(
-    ToyToStandard
+    ToyConversion
 
     ToyToStandard.cc
+    ToyToLLVM.cc
 
     DEPENDS
-    ToyToStandardIncGen
+    ToyConversionIncGen
 )

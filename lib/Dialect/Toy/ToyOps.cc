@@ -117,34 +117,76 @@ void ConstantOp::print(mlir::OpAsmPrinter &printer) {
   printer << getValue();
 }
 
-/// Verifier for the constant operation. This corresponds to the
-/// `let hasVerifier = 1` in the op definition.
-llvm::LogicalResult ConstantOp::verify() {
-  // If the return type of the constant is not an unranked tensor, the shape
-  // must match the shape of the attribute holding the data.
-  auto resultType = llvm::dyn_cast<mlir::RankedTensorType>(getResult().getType());
-  if (!resultType)
-    return success();
+/// Verify that the given attribute value is valid for the given type.
+static llvm::LogicalResult verifyConstantForType(mlir::Type type,
+                                                 mlir::Attribute opaqueValue,
+                                                 mlir::Operation *op) {
+  if (llvm::isa<mlir::TensorType>(type)) {
+    // Check that the value is an elements attribute.
+    auto attrValue = llvm::dyn_cast<mlir::DenseFPElementsAttr>(opaqueValue);
+    if (!attrValue)
+      return op->emitError("constant of TensorType must be initialized by "
+                           "a DenseFPElementsAttr, got ")
+             << opaqueValue;
 
-  // Check that the rank of the attribute type matches the rank of the constant
-  // result type.
-  auto attrType = llvm::cast<mlir::RankedTensorType>(getValue().getType());
-  if (attrType.getRank() != resultType.getRank()) {
-    return emitOpError("return type must match the one of the attached value "
-                       "attribute: ")
-           << attrType.getRank() << " != " << resultType.getRank();
-  }
+    // If the return type of the constant is not an unranked tensor, the shape
+    // must match the shape of the attribute holding the data.
+    auto resultType = llvm::dyn_cast<mlir::RankedTensorType>(type);
+    if (!resultType)
+      return success();
 
-  // Check that each of the dimensions match between the two types.
-  for (int dim = 0, dimE = attrType.getRank(); dim < dimE; ++dim) {
-    if (attrType.getShape()[dim] != resultType.getShape()[dim]) {
-      return emitOpError(
-                 "return type shape mismatches its attribute at dimension ")
-             << dim << ": " << attrType.getShape()[dim]
-             << " != " << resultType.getShape()[dim];
+    // Check that the rank of the attribute type matches the rank of the
+    // constant result type.
+    auto attrType = llvm::cast<mlir::RankedTensorType>(attrValue.getType());
+    if (attrType.getRank() != resultType.getRank()) {
+      return op->emitOpError("return type must match the one of the attached "
+                             "value attribute: ")
+             << attrType.getRank() << " != " << resultType.getRank();
     }
+
+    // Check that each of the dimensions match between the two types.
+    for (int dim = 0, dimE = attrType.getRank(); dim < dimE; ++dim) {
+      if (attrType.getShape()[dim] != resultType.getShape()[dim]) {
+        return op->emitOpError(
+                   "return type shape mismatches its attribute at dimension ")
+               << dim << ": " << attrType.getShape()[dim]
+               << " != " << resultType.getShape()[dim];
+      }
+    }
+    return mlir::success();
   }
+  auto resultType = llvm::cast<ToyStructType>(type);
+  llvm::ArrayRef<mlir::Type> resultElementTypes = resultType.getElementTypes();
+
+  // Verify that the initializer is an Array.
+  auto attrValue = llvm::dyn_cast<ArrayAttr>(opaqueValue);
+  if (!attrValue || attrValue.getValue().size() != resultElementTypes.size())
+    return op->emitError("constant of StructType must be initialized by an "
+                         "ArrayAttr with the same number of elements, got ")
+           << opaqueValue;
+
+  // Check that each of the elements are valid.
+  llvm::ArrayRef<mlir::Attribute> attrElementValues = attrValue.getValue();
+  for (const auto it : llvm::zip(resultElementTypes, attrElementValues))
+    if (failed(verifyConstantForType(std::get<0>(it), std::get<1>(it), op)))
+      return mlir::failure();
   return mlir::success();
+}
+
+/// Verifier for the constant operation. This corresponds to the `::verify(...)`
+/// in the op definition.
+llvm::LogicalResult ConstantOp::verify() {
+  return verifyConstantForType(getResult().getType(), getValue(), *this);
+}
+
+llvm::LogicalResult StructConstantOp::verify() {
+  return verifyConstantForType(getResult().getType(), getValue(), *this);
+}
+
+/// Infer the output shape of the ConstantOp, this is required by the shape
+/// inference interface.
+void ConstantOp::inferShapes() {
+  getResult().setType(cast<TensorType>(getValue().getType()));
 }
 
 //===----------------------------------------------------------------------===//
@@ -172,6 +214,10 @@ void AddOp::inferShapes() { getResult().setType(getLhs().getType()); }
 // CastOp
 //===----------------------------------------------------------------------===//
 
+/// Infer the output shape of the CastOp, this is required by the shape
+/// inference interface.
+void CastOp::inferShapes() { getResult().setType(getInput().getType()); }
+
 /// Returns true if the given set of input and result types are compatible with
 /// this cast operation. This is required by the `CastOpInterface` to verify
 /// this operation and provide other additional utilities.
@@ -185,45 +231,6 @@ bool CastOp::areCastCompatible(TypeRange inputs, TypeRange outputs) {
     return false;
   // The shape is required to match if both types are ranked.
   return !input.hasRank() || !output.hasRank() || input == output;
-}
-
-/// Infer the output shape of the CastOp, this is required by the shape
-/// inference interface.
-void CastOp::inferShapes() { getResult().setType(getInput().getType()); }
-
-//===----------------------------------------------------------------------===//
-// GenericCallOp
-//===----------------------------------------------------------------------===//
-
-void GenericCallOp::build(mlir::OpBuilder &builder, mlir::OperationState &state,
-                          StringRef callee, ArrayRef<mlir::Value> arguments) {
-  // Generic call always returns an unranked Tensor initially.
-  state.addTypes(UnrankedTensorType::get(builder.getF64Type()));
-  state.addOperands(arguments);
-  state.addAttribute("callee",
-                     mlir::SymbolRefAttr::get(builder.getContext(), callee));
-}
-
-/// Return the callee of the generic call operation, this is required by the
-/// call interface.
-CallInterfaceCallable GenericCallOp::getCallableForCallee() {
-  return (*this)->getAttrOfType<SymbolRefAttr>("callee");
-}
-
-/// Set the callee for the generic call operation, this is required by the call
-/// interface.
-void GenericCallOp::setCalleeFromCallable(CallInterfaceCallable callee) {
-  (*this)->setAttr("callee", callee.get<SymbolRefAttr>());
-}
-
-/// Get the argument operands to the called function, this is required by the
-/// call interface.
-Operation::operand_range GenericCallOp::getArgOperands() { return getInputs(); }
-
-/// Get the argument operands to the called function as a mutable range, this is
-/// required by the call interface.
-MutableOperandRange GenericCallOp::getArgOperandsMutable() {
-  return getInputsMutable();
 }
 
 //===----------------------------------------------------------------------===//
@@ -260,6 +267,41 @@ void FuncOp::print(mlir::OpAsmPrinter &p) {
   mlir::function_interface_impl::printFunctionOp(
       p, *this, /*isVariadic=*/false, getFunctionTypeAttrName(),
       getArgAttrsAttrName(), getResAttrsAttrName());
+}
+
+//===----------------------------------------------------------------------===//
+// GenericCallOp
+//===----------------------------------------------------------------------===//
+
+void GenericCallOp::build(mlir::OpBuilder &builder, mlir::OperationState &state,
+                          StringRef callee, ArrayRef<mlir::Value> arguments) {
+  // Generic call always returns an unranked Tensor initially.
+  state.addTypes(UnrankedTensorType::get(builder.getF64Type()));
+  state.addOperands(arguments);
+  state.addAttribute("callee",
+                     mlir::SymbolRefAttr::get(builder.getContext(), callee));
+}
+
+/// Return the callee of the generic call operation, this is required by the
+/// call interface.
+CallInterfaceCallable GenericCallOp::getCallableForCallee() {
+  return (*this)->getAttrOfType<SymbolRefAttr>("callee");
+}
+
+/// Set the callee for the generic call operation, this is required by the call
+/// interface.
+void GenericCallOp::setCalleeFromCallable(CallInterfaceCallable callee) {
+  (*this)->setAttr("callee", callee.get<SymbolRefAttr>());
+}
+
+/// Get the argument operands to the called function, this is required by the
+/// call interface.
+Operation::operand_range GenericCallOp::getArgOperands() { return getInputs(); }
+
+/// Get the argument operands to the called function as a mutable range, this is
+/// required by the call interface.
+MutableOperandRange GenericCallOp::getArgOperandsMutable() {
+  return getInputsMutable();
 }
 
 //===----------------------------------------------------------------------===//
@@ -321,6 +363,34 @@ llvm::LogicalResult ReturnOp::verify() {
 }
 
 //===----------------------------------------------------------------------===//
+// StructAccessOp
+//===----------------------------------------------------------------------===//
+
+void StructAccessOp::build(mlir::OpBuilder &b, mlir::OperationState &state,
+                           mlir::Value input, size_t index) {
+  // Extract the result type from the input type.
+  ToyStructType structTy = llvm::cast<ToyStructType>(input.getType());
+  assert(index < structTy.getElementTypes().size());
+  mlir::Type resultType = structTy.getElementTypes()[index];
+
+  // Call into the auto-generated build method.
+  build(b, state, resultType, input, b.getI64IntegerAttr(index));
+}
+
+llvm::LogicalResult StructAccessOp::verify() {
+  ToyStructType structTy = llvm::cast<ToyStructType>(getInput().getType());
+  size_t indexValue = getIndex();
+  if (indexValue >= structTy.getElementTypes().size())
+    return emitOpError()
+           << "index should be within the range of the input struct type";
+  mlir::Type resultType = getResult().getType();
+  if (resultType != structTy.getElementTypes()[indexValue])
+    return emitOpError() << "must have the same result type as the struct "
+                            "element referred to by the index";
+  return mlir::success();
+}
+
+//===----------------------------------------------------------------------===//
 // TransposeOp
 //===----------------------------------------------------------------------===//
 
@@ -349,21 +419,6 @@ llvm::LogicalResult TransposeOp::verify() {
            << "expected result shape to be a transpose of the input";
   }
   return mlir::success();
-}
-
-/// Register our patterns as "canonicalization" patterns on the TransposeOp so
-/// that they can be picked up by the Canonicalization framework.
-void TransposeOp::getCanonicalizationPatterns(RewritePatternSet &results,
-                                              MLIRContext *context) {
-  results.add<TransposeTransposeOptPattern>(context);
-}
-
-/// Register our patterns as "canonicalization" patterns on the ReshapeOp so
-/// that they can be picked up by the Canonicalization framework.
-void ReshapeOp::getCanonicalizationPatterns(RewritePatternSet &results,
-                                            MLIRContext *context) {
-  results.add<ReshapeReshapeOptPattern, RedundantReshapeOptPattern,
-              FoldConstantReshapeOptPattern>(context);
 }
 
 } // namespace toy

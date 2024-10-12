@@ -2,7 +2,10 @@ import lit.formats
 
 config.name = 'cake-mlir'
 config.test_format = lit.formats.ShTest(True)
-config.suffixes = ['.mlir', '.toy']
+config.suffixes = ['.mlir']
+
+if config.enable_toy:
+    config.suffixes.append('.toy')
 
 config.test_source_root = os.path.dirname(__file__)
 # 测试的输出文件夹

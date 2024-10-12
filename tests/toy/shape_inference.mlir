@@ -19,10 +19,10 @@ toy.func @main() {
   toy.return
 }
 
-// CHECK-NOT: toy.func @multiply_transpose
+// CHECK-NOT: func @multiply_transpose
 // CHECK-NOT: tensor<*xf64>
 
-// CHECK-LABEL: toy.func @main()
+// CHECK-LABEL: func @main()
 // CHECK:         [[VAL_0:%.*]] = toy.constant dense<{{\[\[}}1.000000e+00, 2.000000e+00, 3.000000e+00], [4.000000e+00, 5.000000e+00, 6.000000e+00]]> : tensor<2x3xf64>
 // CHECK:         [[VAL_1:%.*]] = toy.transpose([[VAL_0]] : tensor<2x3xf64>) to tensor<3x2xf64>
 // CHECK:         [[VAL_2:%.*]] = toy.mul [[VAL_1]], [[VAL_1]] : tensor<3x2xf64>

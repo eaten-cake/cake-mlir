@@ -11,9 +11,22 @@ def ToyToStandard : Pass<"toy-to-standard"> {
         tensor, and arith.
     }];
     let dependentDialects = [
-        "mlir::arith::ArithDialect",
+        "mlir::func::FuncDialect",
         "mlir::toy::ToyDialect",
-        "mlir::tensor::TensorDialect",
+        "mlir::affine::AffineDialect",
+        "mlir::memref::MemRefDialect",
+    ];
+}
+
+def ToyToLLVM : Pass<"toy-to-llvm"> {
+    let summary = "Lower `toy` to llvm MLIR dialects.";
+  
+    let description = [{
+        This pass lowers the `toy` dialect to llvm MLIR, a mixture of affine,
+        tensor, and arith.
+    }];
+    let dependentDialects = [
+        "mlir::LLVM::LLVMDialect",
         "mlir::scf::SCFDialect",
     ];
 }
