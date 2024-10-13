@@ -72,13 +72,22 @@ struct ToyInlinerInterface : public DialectInlinerInterface {
   }
 };
 
-void ToyDialect::initialize() {
+mlir::Operation *ToyDialect::materializeConstant(mlir::OpBuilder &builder,
+                                                 mlir::Attribute value,
+                                                 mlir::Type type,
+                                                 mlir::Location loc) {
+  if (llvm::isa<ToyStructType>(type))
+    return builder.create<StructConstantOp>(loc, type,
+                                            llvm::cast<mlir::ArrayAttr>(value));
+  return builder.create<ConstantOp>(loc, type,
+                                    llvm::cast<mlir::DenseElementsAttr>(value));
+}
 
+void ToyDialect::initialize() {
     addTypes<
 #define GET_TYPEDEF_LIST
 #include "cake-mlir/Dialect/Toy/ToyTypes.cpp.inc"
     >();
-
     addOperations<
 #define GET_OP_LIST
 #include "cake-mlir/Dialect/Toy/ToyOps.cpp.inc"

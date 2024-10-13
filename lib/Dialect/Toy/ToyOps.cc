@@ -421,5 +421,37 @@ llvm::LogicalResult TransposeOp::verify() {
   return mlir::success();
 }
 
+/// Fold constants.
+OpFoldResult ConstantOp::fold(FoldAdaptor adaptor) { return getValue(); }
+
+/// Fold struct constants.
+OpFoldResult StructConstantOp::fold(FoldAdaptor adaptor) { return getValue(); }
+
+/// Fold simple struct access operations that access into a constant.
+OpFoldResult StructAccessOp::fold(FoldAdaptor adaptor) {
+  auto structAttr =
+      llvm::dyn_cast_if_present<mlir::ArrayAttr>(adaptor.getInput());
+  if (!structAttr)
+    return nullptr;
+
+  size_t elementIndex = getIndex();
+  return structAttr[elementIndex];
+}
+
+/// Register our patterns as "canonicalization" patterns on the TransposeOp so
+/// that they can be picked up by the Canonicalization framework.
+void TransposeOp::getCanonicalizationPatterns(RewritePatternSet &results,
+                                              MLIRContext *context) {
+  results.add<TransposeTransposeOptPattern>(context);
+}
+
+/// Register our patterns as "canonicalization" patterns on the ReshapeOp so
+/// that they can be picked up by the Canonicalization framework.
+void ReshapeOp::getCanonicalizationPatterns(RewritePatternSet &results,
+                                            MLIRContext *context) {
+  results.add<ReshapeReshapeOptPattern, RedundantReshapeOptPattern,
+              FoldConstantReshapeOptPattern>(context);
+}
+
 } // namespace toy
 } // namespace mlir
