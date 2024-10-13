@@ -18,13 +18,17 @@ import time
 import subprocess
 
 def lowering_to_llvmir(mod = None):
-    command = "echo 'Hello, World!'"
+    mod.operation.print(
+        file=open("tmp.mlir", "w")
+    )
+    command = "cake-translate --mlir-to-llvmir tmp.mlir"
     result = subprocess.run(command, shell=True, text=True, capture_output=True)
+    print(result)
     
 
-lowering_to_llvmir()
+# lowering_to_llvmir()
 
-exit(0)
+# exit(0)
 
 class CustomModel(nn.Module):
 
@@ -41,11 +45,11 @@ class CustomModel(nn.Module):
         x = self.fc1(x)
         return x
 
-model = torchvision.models.resnet18()
-model = model.eval()
-
-# model = CustomModel()
+# model = torchvision.models.resnet18()
 # model = model.eval()
+
+model = CustomModel()
+model = model.eval()
 
 x = torch.randn(1, 3, 224, 224)
 
@@ -58,7 +62,7 @@ mod.operation.regions[0].blocks[0].operations[0].print(
 mod = lowering_to_llvm(mod)
 
 mod.operation.print(
-    file=open("out.mlir", "w")
+    file=open("llvmir.mlir", "w")
 )
 
 # exit(0)
@@ -111,5 +115,7 @@ with torch.no_grad():
         print("Results match!")
     else:
         print("Results don't match!")
+
+# lowering_to_llvmir(mod)
 
 

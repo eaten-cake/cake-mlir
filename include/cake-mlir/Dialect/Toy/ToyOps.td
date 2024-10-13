@@ -355,7 +355,7 @@ def StructAccessOp : Toy_Op<"struct_access", [Pure]> {
   let results = (outs Toy_Type:$output);
 
   let assemblyFormat = [{
-    $input `[` $index `]` attr-dict `:` type($input) `->` type($output)
+    $input `[` $index `]` attr-dict `:` qualified(type($input)) `->` type($output)
   }];
 
   // Allow building a StructAccessOp with just a struct value and an index.
@@ -391,7 +391,7 @@ def StructConstantOp : Toy_Op<"struct_constant", [ConstantLike, Pure]> {
   let arguments = (ins ArrayAttr:$value);
   let results = (outs Toy_StructType:$output);
 
-  let assemblyFormat = "$value attr-dict `:` type($output)";
+  let assemblyFormat = "$value attr-dict `:` qualified(type($output))";
 
   // Indicate that additional verification for this operation is necessary.
   let hasVerifier = 1;
