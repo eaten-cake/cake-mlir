@@ -16,6 +16,7 @@ import numpy as np
 
 import time
 import subprocess
+import os
 
 def save2file(text, filename):
     with open(filename, "w") as f:
@@ -29,7 +30,7 @@ def lowering_to_llvmir(mod = None):
 
 def compile2lib(mod = None):
     command = "llc -filetype=obj -relocation-model=pic -o model.o llvmir.ll"
-    link_cmd = "clang++ -shared -fPIC -o model.so model.o"
+    link_cmd = "clang++ -shared -fPIC -o libmodel.so model.o"
     result = subprocess.run(command, shell=True, text=True, capture_output=True)
     result = subprocess.run(link_cmd, shell=True, text=True, capture_output=True)
     return (result.stdout, result.stderr)
@@ -74,6 +75,15 @@ mod.operation.print(
     file=open("llvmir.mlir", "w")
 )
 
+llvmir = lowering_to_llvmir(mod)
+
+save2file(llvmir, "llvmir.ll")
+
+out, err = compile2lib(llvmir)
+
+print(out)
+print(err)
+
 # exit(0)
 
 buffers = model.named_buffers(remove_duplicate=False)
@@ -84,8 +94,9 @@ params = {
 params_flat, params_spec = pytree.tree_flatten(params)
 params_flat = list(params_flat)
 
-# engine = execution_engine.ExecutionEngine(mod, shared_libs=["/home/yrx/develop/llvm-project/build/lib/libmlir_c_runner_utils.so"])
-engine = execution_engine.ExecutionEngine(mod)
+llvm_home = os.environ.get("LLVM_HOME")
+
+engine = execution_engine.ExecutionEngine(mod, shared_libs=[f"{llvm_home}/build/lib/libmlir_c_runner_utils.so"])
 
 
 with torch.no_grad():
@@ -126,13 +137,4 @@ with torch.no_grad():
         print("Results match!")
     else:
         print("Results don't match!")
-
-llvmir = lowering_to_llvmir(mod)
-
-save2file(llvmir, "llvmir.ll")
-
-out, err = compile2lib(llvmir)
-
-print(out)
-print(err)
 
