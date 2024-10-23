@@ -8,15 +8,6 @@ project(cake-mlir LANGUAGES CXX C)
 
 set(CakeMLIR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-# load config.cmake if it exists
-if(EXISTS ${CMAKE_BINARY_DIR}/config.cmake)
-  include(${CMAKE_BINARY_DIR}/config.cmake)
-else()
-  if(EXISTS ${CMAKE_SOURCE_DIR}/cmake/config.cmake)
-    include(${CMAKE_SOURCE_DIR}/cmake/config.cmake)
-  endif()
-endif()
-
 include(cmake/toolchain.cmake)
 include(cmake/MLIR.cmake)
 include(cmake/stablehlo.cmake)

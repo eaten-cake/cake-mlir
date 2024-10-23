@@ -1,1 +1,3 @@
 *.mlir
+build/
+*.ll

@@ -17,13 +17,22 @@ import numpy as np
 import time
 import subprocess
 
+def save2file(text, filename):
+    with open(filename, "w") as f:
+        f.write(text)
+
+
 def lowering_to_llvmir(mod = None):
-    mod.operation.print(
-        file=open("tmp.mlir", "w")
-    )
-    command = "cake-translate --mlir-to-llvmir tmp.mlir"
+    command = "cake-translate --mlir-to-llvmir"
+    result = subprocess.run(command, shell=True, text=True, capture_output=True, input=str(mod))
+    return result.stdout
+
+def compile2lib(mod = None):
+    command = "llc -filetype=obj -relocation-model=pic -o model.o llvmir.ll"
+    link_cmd = "clang++ -shared -fPIC -o model.so model.o"
     result = subprocess.run(command, shell=True, text=True, capture_output=True)
-    print(result)
+    result = subprocess.run(link_cmd, shell=True, text=True, capture_output=True)
+    return (result.stdout, result.stderr)
     
 
 # lowering_to_llvmir()
@@ -75,7 +84,9 @@ params = {
 params_flat, params_spec = pytree.tree_flatten(params)
 params_flat = list(params_flat)
 
-engine = execution_engine.ExecutionEngine(mod, shared_libs=["/home/yrx/llvm-project/build/lib/libmlir_c_runner_utils.so"])
+# engine = execution_engine.ExecutionEngine(mod, shared_libs=["/home/yrx/develop/llvm-project/build/lib/libmlir_c_runner_utils.so"])
+engine = execution_engine.ExecutionEngine(mod)
+
 
 with torch.no_grad():
     numpy_inputs = [o.numpy() for o in params_flat]
@@ -116,6 +127,12 @@ with torch.no_grad():
     else:
         print("Results don't match!")
 
-# lowering_to_llvmir(mod)
+llvmir = lowering_to_llvmir(mod)
 
+save2file(llvmir, "llvmir.ll")
+
+out, err = compile2lib(llvmir)
+
+print(out)
+print(err)
 

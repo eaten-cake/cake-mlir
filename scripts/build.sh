@@ -12,8 +12,6 @@ mkdir -p $PROJECT_DIR/build
 
 cd $PROJECT_DIR/build
 
-cp ../cmake/config.cmake ./
-
 # LLVM installation directory
 LLVM_INSTALL_DIR=$(llvm-config --prefix)
 # python executable path
@@ -28,6 +26,13 @@ cmake .. -G Ninja \
     -DMLIR_DIR="$LLVM_INSTALL_DIR/lib/cmake/mlir/" \
     -DLLVM_DIR="$LLVM_INSTALL_DIR/lib/cmake/llvm/" \
     -DCMAKE_BUILD_TYPE=Debug \
+    \
+    -DCAKE_MLIR_ENABLE_TORCH_MLIR=ON \
+    -DCAKE_MLIR_ENABLE_STABLEHLO=OFF \
+    -DCAKE_MLIR_ENABLE_PYTHON_BINDINGS=ON \
+    -DCAKE_MLIR_ENABLE_LLD=ON \
+    -DCAKE_MLIR_ENABLE_CCACHE=ON \
+    -DCAKE_MLIR_ENABLE_TOY=ON \
 
 ninja -j4
 
