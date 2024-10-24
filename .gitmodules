@@ -4,3 +4,6 @@
 [submodule "3rdparty/torch-mlir"]
 	path = 3rdparty/torch-mlir
 	url = https://github.com/llvm/torch-mlir.git
+[submodule "3rdparty/dlpack"]
+	path = 3rdparty/dlpack
+	url = https://github.com/dmlc/dlpack.git

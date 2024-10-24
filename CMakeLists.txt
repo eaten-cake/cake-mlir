@@ -12,6 +12,7 @@ include(cmake/toolchain.cmake)
 include(cmake/MLIR.cmake)
 include(cmake/stablehlo.cmake)
 include(cmake/torch-mlir.cmake)
+include(cmake/dlpack.cmake)
 
 add_subdirectory(tests)
 add_subdirectory(lib)

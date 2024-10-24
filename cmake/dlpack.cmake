@@ -1,0 +1,1 @@
+include_directories(${CakeMLIR_SOURCE_DIR}/3rdparty/dlpack/include)

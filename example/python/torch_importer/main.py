@@ -34,25 +34,16 @@ def compile2lib(mod = None):
     result = subprocess.run(command, shell=True, text=True, capture_output=True)
     result = subprocess.run(link_cmd, shell=True, text=True, capture_output=True)
     return (result.stdout, result.stderr)
-    
-
-# lowering_to_llvmir()
-
-# exit(0)
 
 class CustomModel(nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 32, 3, padding = 1, stride = 2)
-        self.conv2 = nn.Conv2d(32, 32, 3, padding = 1, stride = 2)
-        self.fc1 = nn.Linear(32 * 56 * 56, 10)
+        self.conv1 = nn.Conv2d(3, 3, 3, padding = 1, stride = 2)
     
     def forward(self, x):
         x = self.conv1(x)
-        x = self.conv2(x)
-        x = x.reshape(-1, 32 * 56 * 56)
-        x = self.fc1(x)
+        # x = torch.add(x, 1)
         return x
 
 # model = torchvision.models.resnet18()
@@ -61,7 +52,13 @@ class CustomModel(nn.Module):
 model = CustomModel()
 model = model.eval()
 
-x = torch.randn(1, 3, 224, 224)
+input_shape = (1, 3, 64, 64)
+output_shape = (1, 3, 32, 32)
+
+x = torch.randn(input_shape)
+
+y = model(x)
+print(x.shape, y.shape)
 
 mod = frontend.from_torch(model, (x,))
 
@@ -106,7 +103,7 @@ numpy_inputs.append(x.numpy())
 
 ffi_args = []
 
-res = np.zeros((1, 1000), dtype=np.float32)
+res = np.zeros(output_shape, dtype=np.float32)
 
 res_c = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(res)))
 
