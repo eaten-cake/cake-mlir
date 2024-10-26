@@ -6,7 +6,7 @@
 #include <vector>
 #include <stdexcept>
 
-#include "dlpack/dlpack.h"
+// #include "dlpack/dlpack.h"
 
 template <typename dtype, int N>
 class Tensor {
@@ -32,12 +32,21 @@ public:
     dtype* getData() {
         return aligned;
     }
-private:
+    int64_t getOffset() {
+        return offset;
+    }
+
     dtype *allocated;
     dtype *aligned;
     int64_t offset;
     int64_t shape[N];
     int64_t strides[N];
 };
+
+template <typename dtype>
+class UnrankedTensor {
+    int64_t rank;
+    void* descriptor;
+}
 
 #endif // CAKE_MLIR_RUNTIME_TENSOR_H_

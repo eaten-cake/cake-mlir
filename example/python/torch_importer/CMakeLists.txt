@@ -12,4 +12,4 @@ include_directories(/home/yrx/develop/cake-mlir/include)
 
 add_executable(runtime runtime.cc)
 
-target_link_libraries(runtime PRIVATE model mlir_c_runner_utils)
+target_link_libraries(runtime PRIVATE model)

@@ -72,6 +72,8 @@ mod.operation.print(
     file=open("llvmir.mlir", "w")
 )
 
+exit(0)
+
 llvmir = lowering_to_llvmir(mod)
 
 save2file(llvmir, "llvmir.ll")

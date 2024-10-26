@@ -49,18 +49,18 @@ def lowering_to_llvm(module : Module) -> Module:
         "one-shot-bufferize{bufferize-function-boundaries}",
         "buffer-deallocation-pipeline",
 
-        "convert-linalg-to-affine-loops",
+        # "convert-linalg-to-affine-loops",
 
-        "expand-strided-metadata",
-        "lower-affine",
+        # "expand-strided-metadata",
+        # "lower-affine",
 
-        "convert-scf-to-cf",
-        "convert-cf-to-llvm",
-        "convert-math-to-llvm",
-        "convert-arith-to-llvm",
-        "convert-func-to-llvm",
-        "finalize-memref-to-llvm",
-        "reconcile-unrealized-casts",
+        # "convert-scf-to-cf",
+        # "convert-cf-to-llvm",
+        # "convert-math-to-llvm",
+        # "convert-arith-to-llvm",
+        # "convert-func-to-llvm",
+        # "finalize-memref-to-llvm",
+        # "reconcile-unrealized-casts",
     ]
 
     pipeline_str = sequential(passes)
