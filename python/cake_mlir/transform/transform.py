@@ -1,6 +1,8 @@
 from cake_mlir import passmanager
 from cake_mlir.ir import Module
 
+import subprocess
+
 TOSA_TO_LINALG_PASS = ",".join(
     [
         # TOSA legalization may emit tosa.const() ops. These are legalized
@@ -49,18 +51,18 @@ def lowering_to_llvm(module : Module) -> Module:
         "one-shot-bufferize{bufferize-function-boundaries}",
         "buffer-deallocation-pipeline",
 
-        # "convert-linalg-to-affine-loops",
+        "convert-linalg-to-affine-loops",
 
-        # "expand-strided-metadata",
-        # "lower-affine",
+        "expand-strided-metadata",
+        "lower-affine",
 
-        # "convert-scf-to-cf",
-        # "convert-cf-to-llvm",
-        # "convert-math-to-llvm",
-        # "convert-arith-to-llvm",
-        # "convert-func-to-llvm",
-        # "finalize-memref-to-llvm",
-        # "reconcile-unrealized-casts",
+        "convert-scf-to-cf",
+        "convert-cf-to-llvm",
+        "convert-math-to-llvm",
+        "convert-arith-to-llvm",
+        "convert-func-to-llvm",
+        "finalize-memref-to-llvm",
+        "reconcile-unrealized-casts",
     ]
 
     pipeline_str = sequential(passes)
@@ -69,3 +71,17 @@ def lowering_to_llvm(module : Module) -> Module:
         pm = passmanager.PassManager.parse(pipeline_str)
         pm.run(module.operation)
     return module
+
+def lowering_to_llvmir(module : Module) -> str:
+    command = "cake-translate --mlir-to-llvmir"
+    result = subprocess.run(command, shell=True, text=True, capture_output=True, input=str(module))
+    return (result.stdout, result.stderr)
+
+def compile2lib(mod):
+    command = "llc -filetype=obj -o model.o"
+    result = subprocess.run(command, shell=True, text=True, capture_output=True, input=str(mod))
+    link_command = "clang++ -shared -fPIC -o libmodel.so model.o"
+    result = subprocess.run(link_command, shell=True, text=True, capture_output=True)
+    return (result.stdout, result.stderr)
+
+

@@ -29,7 +29,7 @@ def from_torch(
 
     operation = importer.import_frozen_program(
         prog,
-        func_name="forward"
+        func_name="__cake_forward__"
     )
 
     operation.attributes["llvm.emit_c_interface"] = UnitAttr.get(operation.context)
@@ -43,6 +43,12 @@ def from_torch(
 
     pm = PassManager.parse(pipeline_str, ctx)
     pm.run(importer.module.operation)
+
+    buffers = dict(model.named_buffers(remove_duplicate=False))
+
+    # for key in buffers:
+    #     print(key)
+
     return importer.module
 
 

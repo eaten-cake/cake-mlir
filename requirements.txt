@@ -2,3 +2,5 @@ numpy
 torch
 lit
 pybind11
+PyYAML
+ml_dtypes

@@ -45,6 +45,7 @@ ninja check
 # Add the following lines to your ~/.bashrc to use the cake-mlir
 echo_color "You can write following command in your ~/.bashrc to use the cake-mlir:" "yellow"
 echo_color "export PATH=${PROJECT_DIR}/build/bin:\$PATH" "yellow"
+echo_color "export LD_LIBRARY_PATH=${PROJECT_DIR}/build/lib:\$LD_LIBRARY_PATH" "yellow"
 echo_color "export PYTHONPATH=${PROJECT_DIR}/build/python_packages/cake_mlir:\$PYTHONPATH" "yellow"
 
 cd -

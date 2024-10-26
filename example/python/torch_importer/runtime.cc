@@ -3,40 +3,30 @@
 #include <vector>
 #include <initializer_list>
 #include <cstring>
+#include <functional>
+
+#include <dlfcn.h>
 
 #include "cake-mlir/runtime/tensor.h"
+#include "cake-mlir/runtime/module.h"
 
-extern "C" void _mlir_ciface_forward(Tensor<float, 4> *output, Tensor<float, 4> *input);
-
-extern "C" void memrefCopy(int64_t elemSize, Tensor<float, 1> *src, Tensor<float, 1> *dst) {
-    float* srcData = src->getData() + src->getOffset() * elemSize;
-    float* dstData = dst->getData() + dst->getOffset() * elemSize;
-
-    std::cout << elemSize << "\n";
-
-    // memcpy(dstData, srcData, elemSize);
-
-    // for(int i = 0; i < 2; i++) {
-    //     dst->strides[i] = src->strides[i];
-    //     dst->shape[i] = src->shape[i];
-    // }
-
-    
-
-    exit(0);
-
-    // std::cout << "memrefCopy called\n";
-
-    // exit(0);
-
-}
+using namespace cake::runtime;
 
 int main() {
 
     Tensor<float, 4> input({1, 3, 64, 64});
     Tensor<float, 4> output({1, 3, 32, 32});
 
-    _mlir_ciface_forward(&output, &input);
+    // _mlir_ciface_forward(&output, &input);
+
+    void* handle = dlopen("../libmodel.so", RTLD_LAZY);
+    if (!handle) {
+        std::cerr << "Could not load library: " << dlerror() << std::endl;
+        return 1;
+    }
+
+    auto func = load_function<void, Tensor<float, 4>*, Tensor<float, 4>*>(handle, "_mlir_ciface___cake_forward__");
+    func(&output, &input);
 
     std::cout << "output:\n";
     for(int i = 0; i < 10; i++) {

@@ -23,6 +23,15 @@ declare_mlir_python_sources(CakeMLIRPythonSources.Torch.Importers
     extras/fx_decomp_util.py
 )
 
+# add __init__.py
+declare_mlir_python_sources(
+  CakeMLIRPythonSources.Core
+  ADD_TO_PARENT CakeMLIRPythonSources
+  ROOT_DIR "${CakeMLIR_SOURCE_DIR}/python/cake_mlir"
+  SOURCES
+    __init__.py
+)
+
 # Add frontend sources.
 declare_mlir_python_sources(
   CakeMLIRPythonSources.Frontend
@@ -33,7 +42,6 @@ declare_mlir_python_sources(
     frontend/torch/torch_importer.py
     frontend/onnx/onnx_importer.py
 )
-
 
 declare_mlir_python_sources(
   CakeMLIRPythonSources.Transform
@@ -98,8 +106,10 @@ set(_source_components
   MLIRPythonExtension.Core
   MLIRPythonExtension.RegisterEverything
 
+  CakeMLIRPythonSources.Core
   CakeMLIRPythonSources.Frontend
   CakeMLIRPythonSources.Transform
+
   CakeMLIRPythonSources.Torch.Importers
   CakeMLIRPythonSources.Torch.Dialects
   CakeMLIRPythonExtension.Torch.Main

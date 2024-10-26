@@ -30,7 +30,7 @@ def lowering_to_llvmir(mod = None):
 
 def compile2lib(mod = None):
     command = "llc -filetype=obj -relocation-model=pic -o model.o llvmir.ll"
-    link_cmd = "clang++ -shared -fPIC -o libmodel.so model.o"
+    link_cmd = "clang++ -shared -fPIC -o libmodel.so model.o -L/home/yrx/develop/cake-mlir/scripts/../build/lib -lcake_runtime"
     result = subprocess.run(command, shell=True, text=True, capture_output=True)
     result = subprocess.run(link_cmd, shell=True, text=True, capture_output=True)
     return (result.stdout, result.stderr)
@@ -55,7 +55,8 @@ model = model.eval()
 input_shape = (1, 3, 64, 64)
 output_shape = (1, 3, 32, 32)
 
-x = torch.randn(input_shape)
+# x = torch.randn(input_shape)
+x = torch.zeros(input_shape)
 
 y = model(x)
 print(x.shape, y.shape)
@@ -71,8 +72,6 @@ mod = lowering_to_llvm(mod)
 mod.operation.print(
     file=open("llvmir.mlir", "w")
 )
-
-exit(0)
 
 llvmir = lowering_to_llvmir(mod)
 
@@ -118,7 +117,7 @@ for arg in numpy_inputs:
     ffi_args.append(input)
 
 start_time = time.time()
-engine.invoke("forward", *ffi_args)
+engine.invoke("__cake_forward__", *ffi_args)
 end_time = time.time()
 
 print("mlir runtime : %fs" % (end_time - start_time))
