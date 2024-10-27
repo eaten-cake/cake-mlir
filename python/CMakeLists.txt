@@ -43,6 +43,16 @@ declare_mlir_python_sources(
     frontend/onnx/onnx_importer.py
 )
 
+# Add utils sources.
+declare_mlir_python_sources(
+  CakeMLIRPythonSources.Utils
+  ADD_TO_PARENT CakeMLIRPythonSources
+  ROOT_DIR "${CakeMLIR_SOURCE_DIR}/python/cake_mlir"
+  SOURCES
+    utils/__init__.py
+    utils/common.py
+)
+
 declare_mlir_python_sources(
   CakeMLIRPythonSources.Transform
   ADD_TO_PARENT CakeMLIRPythonSources
@@ -109,6 +119,7 @@ set(_source_components
   CakeMLIRPythonSources.Core
   CakeMLIRPythonSources.Frontend
   CakeMLIRPythonSources.Transform
+  CakeMLIRPythonSources.Utils
 
   CakeMLIRPythonSources.Torch.Importers
   CakeMLIRPythonSources.Torch.Dialects

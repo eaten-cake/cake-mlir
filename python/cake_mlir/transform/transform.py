@@ -1,3 +1,4 @@
+import cake_mlir as mlc
 from cake_mlir import passmanager
 from cake_mlir.ir import Module
 
@@ -77,10 +78,10 @@ def lowering_to_llvmir(module : Module) -> str:
     result = subprocess.run(command, shell=True, text=True, capture_output=True, input=str(module))
     return (result.stdout, result.stderr)
 
-def compile2lib(mod):
-    command = "llc -filetype=obj -o model.o"
+def compile2lib(mod, runtime_lib : str):
+    command = "llc -filetype=obj -relocation-model=pic -o model.o"
     result = subprocess.run(command, shell=True, text=True, capture_output=True, input=str(mod))
-    link_command = "clang++ -shared -fPIC -o libmodel.so model.o"
+    link_command = f"clang++ -shared -fPIC -o model.so model.o -L{runtime_lib} -lcake_runtime"
     result = subprocess.run(link_command, shell=True, text=True, capture_output=True)
     return (result.stdout, result.stderr)
 
