@@ -7,8 +7,8 @@
 
 #include <dlfcn.h>
 
-#include "cake-mlir/runtime/tensor.h"
-#include "cake-mlir/runtime/module.h"
+#include "cake-mlir/Runtime/tensor.h"
+#include "cake-mlir/Runtime/module.h"
 
 using namespace cake::runtime;
 
