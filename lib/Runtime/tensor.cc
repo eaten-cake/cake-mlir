@@ -1,4 +1,4 @@
-#include "cake-mlir/runtime/tensor.h"
+#include "cake-mlir/Runtime/tensor.h"
 
 #include <cstring>
 

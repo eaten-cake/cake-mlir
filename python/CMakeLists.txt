@@ -5,6 +5,7 @@ include(AddMLIRPython)
 # TODO: Add an upstream cmake param for this vs having a global here.
 add_compile_definitions("MLIR_PYTHON_PACKAGE_PREFIX=cake_mlir.")
 
+set(PYTHON_SOURCE_DIR ${CakeMLIR_SOURCE_DIR}/lib/Bindings/Python)
 
 ################################################################################
 # Sources
@@ -62,6 +63,15 @@ declare_mlir_python_sources(
     transform/transform.py
 )
 
+declare_mlir_python_sources(
+  CakeMLIRPythonSources.Tests
+  ADD_TO_PARENT CakeMLIRPythonSources
+  ROOT_DIR ${CakeMLIR_SOURCE_DIR}/python/cake_mlir
+  SOURCES
+    test/__init__.py
+    test/cake_py_test.py
+)
+
 # declare_mlir_dialect_python_bindings(
 #   ADD_TO_PARENT 
 #   ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cake_mlir"
@@ -107,6 +117,15 @@ declare_mlir_python_extension(CakeMLIRPythonExtension.Torch.Main
     LLVMSupport
 )
 
+declare_mlir_python_extension(CakeMLIRPythonExtension.Tests
+  MODULE_NAME _cakePythonTest
+  ADD_TO_PARENT CakeMLIRPythonExtension
+  ROOT_DIR ${PYTHON_SOURCE_DIR}
+  SOURCES
+    PythonTest.cc
+  
+)
+
 ################################################################################
 # Common CAPI
 ################################################################################
@@ -120,10 +139,13 @@ set(_source_components
   CakeMLIRPythonSources.Frontend
   CakeMLIRPythonSources.Transform
   CakeMLIRPythonSources.Utils
+  CakeMLIRPythonSources.Tests
 
   CakeMLIRPythonSources.Torch.Importers
   CakeMLIRPythonSources.Torch.Dialects
+
   CakeMLIRPythonExtension.Torch.Main
+  CakeMLIRPythonExtension.Tests
 )
 
 # Add StableHLO Python extensions if requested.
