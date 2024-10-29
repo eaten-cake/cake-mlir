@@ -14,30 +14,51 @@ template <typename T, int N>
 class Tensor {
 public:
     Tensor() {}
-    Tensor(std::initializer_list<int64_t> shape) {
-        std::vector<int64_t> shape_vec(shape);
+
+    Tensor(std::vector<int64_t> shape) {
         int shape_size = shape.size();
         if(shape_size != N) throw std::runtime_error("Invalid shape size");
         int64_t total_size = 1;
         for (int i = 0; i < shape_size; i++) {
-            this->shape[i] = shape_vec[i];
-            total_size *= shape_vec[i];
+            this->shape[i] = shape[i];
+            total_size *= shape[i];
         }
         allocated = (T*)malloc(total_size * sizeof(T));
         aligned = allocated;
         offset = 0;
         strides[shape_size - 1] = 1;
         for(int i = shape_size - 2; i >= 0; i--) {
-            strides[i] = strides[i + 1] * shape_vec[i + 1];
+            strides[i] = strides[i + 1] * shape[i + 1];
         }
     }
+
+    template <typename IterType>
+    Tensor(IterType begin, IterType end) : Tensor(std::vector<int64_t>(begin, end)) {}
+
+    Tensor(std::initializer_list<int64_t> shape) : Tensor(std::vector<int64_t>(shape)) {}
+
     T* getData() {
         return aligned;
     }
+
     int64_t getOffset() {
         return offset;
     }
 
+    std::vector<int64_t> getShape() {
+        return std::vector<int64_t>(shape, shape + N);
+    }
+
+    ~Tensor() {
+        if(allocated) free(allocated);
+        allocated = nullptr;
+        aligned = nullptr;
+        offset = 0;
+        delete[] shape;
+        delete[] strides;
+    }
+
+private:
     T *allocated;
     T *aligned;
     int64_t offset;

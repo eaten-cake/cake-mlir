@@ -42,21 +42,21 @@ extern "C" void memrefCopy(int64_t elemSize, UnrankedTensor<char> *srcArg, Unran
         memcpy(dstPtr + writeIndex, srcPtr + readIndex, elemSize);
         // Advance index and read position.
         for (int64_t axis = rank - 1; axis >= 0; --axis) {
-        // Advance at current axis.
-        auto newIndex = ++indices[axis];
-        readIndex += srcStrides[axis];
-        writeIndex += dstStrides[axis];
-        // If this is a valid index, we have our next index, so continue copying.
-        if (src.shape[axis] != newIndex)
-            break;
-        // We reached the end of this axis. If this is axis 0, we are done.
-        if (axis == 0)
-            return;
-        // Else, reset to 0 and undo the advancement of the linear index that
-        // this axis had. Then continue with the axis one outer.
-        indices[axis] = 0;
-        readIndex -= src.shape[axis] * srcStrides[axis];
-        writeIndex -= dst.shape[axis] * dstStrides[axis];
+            // Advance at current axis.
+            auto newIndex = ++indices[axis];
+            readIndex += srcStrides[axis];
+            writeIndex += dstStrides[axis];
+            // If this is a valid index, we have our next index, so continue copying.
+            if (src.shape[axis] != newIndex)
+                break;
+            // We reached the end of this axis. If this is axis 0, we are done.
+            if (axis == 0)
+                return;
+            // Else, reset to 0 and undo the advancement of the linear index that
+            // this axis had. Then continue with the axis one outer.
+            indices[axis] = 0;
+            readIndex -= src.shape[axis] * srcStrides[axis];
+            writeIndex -= dst.shape[axis] * dstStrides[axis];
         }
     }
 
