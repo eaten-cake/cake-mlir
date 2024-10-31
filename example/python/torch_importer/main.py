@@ -44,6 +44,7 @@ class CustomModel(nn.Module):
     def forward(self, x):
         x = self.conv1(x)
         # x = torch.add(x, 1)
+        # x = x + y
         return x
 
 # model = torchvision.models.resnet18()
@@ -57,14 +58,15 @@ output_shape = (1, 3, 32, 32)
 
 # x = torch.randn(input_shape)
 x = torch.zeros(input_shape)
+y = torch.ones(output_shape)
 
-y = model(x)
-print(x.shape, y.shape)
+output = model(x)
+print(x.shape, output.shape)
 
 mod = frontend.from_torch(model, (x,))
 
-mod.operation.regions[0].blocks[0].operations[0].print(
-    file=open("out.mlir", "w")
+mod.operation.print(
+    file=open("tosa.mlir", "w")
 )
 
 mod = lowering_to_llvm(mod)
@@ -84,23 +86,9 @@ print(err)
 
 # exit(0)
 
-buffers = model.named_buffers(remove_duplicate=False)
-
-params = {
-    **dict(buffers)
-}
-params_flat, params_spec = pytree.tree_flatten(params)
-params_flat = list(params_flat)
-
 llvm_home = os.environ.get("LLVM_HOME")
 
 engine = execution_engine.ExecutionEngine(mod, shared_libs=[f"{llvm_home}/build/lib/libmlir_c_runner_utils.so"])
-
-
-with torch.no_grad():
-    numpy_inputs = [o.numpy() for o in params_flat]
-
-numpy_inputs.append(x.numpy())
 
 ffi_args = []
 
@@ -109,15 +97,14 @@ res = np.zeros(output_shape, dtype=np.float32)
 res_c = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(res)))
 
 x_c = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(x.numpy())))
+y_c = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(y.numpy())))
 
 ffi_args.append(res_c)
-
-for arg in numpy_inputs:
-    input = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(arg)))
-    ffi_args.append(input)
+ffi_args.append(x_c)
+# ffi_args.append(y_c)
 
 start_time = time.time()
-engine.invoke("__cake_forward__", *ffi_args)
+engine.invoke("cake_run", *ffi_args)
 end_time = time.time()
 
 print("mlir runtime : %fs" % (end_time - start_time))

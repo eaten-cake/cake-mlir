@@ -8,6 +8,7 @@ from cake_mlir import transform
 from cake_mlir import utils
 
 import torch
+import torch.utils._pytree as pytree
 
 import numpy as np
 
@@ -47,6 +48,8 @@ def from_torch(
     pm.run(importer.module.operation)
 
     buffers = dict(model.named_buffers(remove_duplicate=False))
+    params_flat, params_spec = pytree.tree_flatten(buffers)
+    params_flat = list(params_flat)
 
     mod = importer.module
 
@@ -58,10 +61,10 @@ def from_torch(
 
     with mod.context as ctx, ir.Location.unknown():
         buffers_list = []
-        for key in buffers:
-            dtype = buffers[key].numpy().dtype
-            shape = [d for d in buffers[key].shape]
-            array = np.array(buffers[key].numpy())
+        for param in params_flat:
+            dtype = param.numpy().dtype
+            shape = [d for d in param.shape]
+            array = np.array(param.numpy())
             if shape == []:
                 dense_attr = ir.DenseElementsAttr.get(
                     array,

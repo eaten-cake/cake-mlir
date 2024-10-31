@@ -1,9 +1,25 @@
 #include "cake-mlir/Runtime/tensor.h"
 
 #include <cstring>
+#include <iostream>
 
 namespace cake {
 namespace runtime {
+
+NDArray::NDArray(std::vector<int64_t> shape, DataType dtype, void *dataPtr) {
+    int64_t _rank = shape.size();
+    // _shape = (int64_t *)malloc(_rank * sizeof(int64_t));
+    std::copy(shape.begin(), shape.end(), _shape);
+    // _dtype = dtype;
+    _basePtr = dataPtr;
+    _data = dataPtr;
+    _offset = 0;
+    // _strides = (int64_t *)malloc(_rank * sizeof(int64_t));
+    _strides[_rank - 1] = 1;
+    for(int i = _rank - 2; i >= 0; --i) {
+        _strides[i] = _strides[i + 1] * _shape[i + 1];
+    }
+}
 
 extern "C" void memrefCopy(int64_t elemSize, UnrankedTensor<char> *srcArg, UnrankedTensor<char> *dstArg) {
     

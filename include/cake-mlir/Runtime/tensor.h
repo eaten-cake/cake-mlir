@@ -6,7 +6,8 @@
 #include <vector>
 #include <stdexcept>
 
-// #include "dlpack/dlpack.h"
+#include "types.h"
+
 namespace cake {
 namespace runtime {
 // https://github.com/llvm/llvm-project/blob/08220df62a19b0136924a3e3e48d207cf3e0666c/mlir/lib/Conversion/LLVMCommon/TypeConverter.cpp#L292
@@ -54,11 +55,10 @@ public:
         allocated = nullptr;
         aligned = nullptr;
         offset = 0;
-        delete[] shape;
-        delete[] strides;
+        // free(shape);
+        // free(strides);
     }
 
-private:
     T *allocated;
     T *aligned;
     int64_t offset;
@@ -92,6 +92,31 @@ public:
         shape = rank == 0 ? nullptr : desc->shape;
         strides = shape + rank;
     }
+};
+
+class NDArray {
+public:
+    NDArray() = default;
+
+    NDArray(std::vector<int64_t> shape, DataType dtype, void *dataPtr);
+
+    ~NDArray() {
+        // free(_shape);
+        // free(_strides);
+        // if(_basePtr) {
+        //     free(_basePtr);
+        // }
+        // free(_basePtr);
+    }
+
+// private:
+    void *_basePtr = nullptr;
+    void *_data = nullptr;
+    int64_t _offset;
+    int64_t _shape[4];
+    int64_t _strides[4];
+    // int64_t _rank;
+    // DataType _dtype;
 };
 
 extern "C" void memrefCopy(int64_t elemSize, UnrankedTensor<char> *srcArg, UnrankedTensor<char> *dstArg);
