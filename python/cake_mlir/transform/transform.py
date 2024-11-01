@@ -1,6 +1,7 @@
 import cake_mlir as mlc
-from cake_mlir import passmanager
+from cake_mlir import passmanager, ir
 from cake_mlir.ir import Module
+from cake_mlir.dialects import llvm, func
 
 import subprocess
 
@@ -64,6 +65,11 @@ def lowering_to_llvm(module : Module) -> Module:
         "convert-func-to-llvm",
         "finalize-memref-to-llvm",
         "reconcile-unrealized-casts",
+        # clean up
+        "canonicalize",
+        "sccp",
+        "cse",
+        "symbol-dce",
     ]
 
     pipeline_str = sequential(passes)
@@ -84,5 +90,49 @@ def compile2lib(mod, runtime_lib : str):
     link_command = f"clang++ -shared -fPIC -o model.so model.o -L{runtime_lib} -lcake_runtime"
     result = subprocess.run(link_command, shell=True, text=True, capture_output=True)
     return (result.stdout, result.stderr)
+
+
+
+def add_call_interface(module : Module, input_count : int) -> Module:
+    mod = module
+    cake_run_func = None
+    for op in module.body.operations:
+        if isinstance(op, llvm.LLVMFuncOp) and op.sym_name.value == "_mlir_ciface_cake_run":
+            cake_run_func = op
+            break
+
+    if cake_run_func is None:
+        raise ValueError("Cannot find cake_run function in module")
+
+    with mod.context as ctx, ir.Location.unknown():
+        ptr_type = llvm.PointerType.get()
+
+
+        with ir.InsertionPoint(mod.body.operations[0]):
+            getRankByIndex_type = ir.TypeAttr.parse("!llvm.func<i64 (ptr, i64)>")
+            getRankByIndex = llvm.LLVMFuncOp("getRankByIndex", getRankByIndex_type)
+        # print(getRankByIndex)
+        # getRankByIndex.move_before(mod.operation)
+
+        # Add call interface to cake_run function
+        module = ir.Module.create()
+        with ir.InsertionPoint(module.body):
+            cake_call_func_type = ir.FunctionType.get([ptr_type], [ptr_type])
+            func_op = func.FuncOp(name="cake_call_func", type=cake_call_func_type)
+            with ir.InsertionPoint(func_op.add_entry_block()):
+                args = func_op.entry_block.arguments
+                input_ptr = args[0] # list of NDArray pointer
+
+                for i in range(input_count):
+                    rank = llvm.CallOp(, [input_ptr])
+
+                return_op = func.ReturnOp([args[0]])
+
+        pm = passmanager.PassManager.parse("builtin.module(convert-func-to-llvm)")
+        pm.run(module.operation)
+        mod.body.append(module.operation.regions[0].blocks[0].operations[0])
+        
+
+    return mod
 
 

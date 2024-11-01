@@ -101,23 +101,42 @@ public:
     NDArray(std::vector<int64_t> shape, DataType dtype, void *dataPtr);
 
     ~NDArray() {
-        // free(_shape);
-        // free(_strides);
-        // if(_basePtr) {
-        //     free(_basePtr);
-        // }
-        // free(_basePtr);
+        if(_basePtr) {
+            free(_basePtr);
+        }
     }
 
-// private:
+    void *getBasePtr() { return _basePtr; }
+    void *getDataPtr() { return _data; }
+    int64_t getOffset() { return _offset; }
+    int64_t *getShapePtr() { return _shape; }
+    int64_t *getStridesPtr() { return _strides; }
+    int64_t getRank() { return _rank; }
+    DataType getDataType() { return _dtype; }
+
+private:
     void *_basePtr = nullptr;
     void *_data = nullptr;
     int64_t _offset;
-    int64_t _shape[4];
-    int64_t _strides[4];
-    // int64_t _rank;
-    // DataType _dtype;
+    int64_t *_shape;
+    int64_t *_strides;
+    int64_t _rank;
+    DataType _dtype;
 };
+
+using ListNDArray = NDArray *;
+
+extern "C" void *getBasePtrByIndex(ListNDArray list, int index);
+
+extern "C" void *getDataPtrByIndex(ListNDArray list, int index);
+
+extern "C" int64_t getOffsetByIndex(ListNDArray list, int index);
+
+extern "C" int64_t getRankByIndex(ListNDArray list, int index);
+
+extern "C" int64_t *getShapeByIndex(ListNDArray list, int index);
+
+extern "C" int64_t *getStridesByIndex(ListNDArray list, int index);
 
 extern "C" void memrefCopy(int64_t elemSize, UnrankedTensor<char> *srcArg, UnrankedTensor<char> *dstArg);
 

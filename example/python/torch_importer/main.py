@@ -8,7 +8,7 @@ from cake_mlir import passmanager, execution_engine, runtime, frontend
 from cake_mlir.extras import fx_importer
 from cake_mlir.dialects import torch as torch_dialect, math
 from cake_mlir.extras.fx_decomp_util import get_decomposition_table
-from cake_mlir.transform import lowering_to_llvm 
+from cake_mlir.transform import lowering_to_llvm, add_call_interface
 from cake_mlir import runtime
 
 import ctypes
@@ -71,6 +71,8 @@ mod.operation.print(
 
 mod = lowering_to_llvm(mod)
 
+mod = add_call_interface(mod, 1)
+
 mod.operation.print(
     file=open("llvmir.mlir", "w")
 )
@@ -80,11 +82,6 @@ llvmir = lowering_to_llvmir(mod)
 save2file(llvmir, "llvmir.ll")
 
 out, err = compile2lib(llvmir)
-
-print(out)
-print(err)
-
-# exit(0)
 
 llvm_home = os.environ.get("LLVM_HOME")
 
