@@ -28,8 +28,7 @@ TOSA_TO_LINALG_PASS = ",".join(
 def sequential(passes : list) -> str:
     return "builtin.module(" + ",".join(passes) + ")"
 
-def lowering_to_llvm(module : Module) -> Module:
-
+def lowering_to_linalg(module : Module) -> Module:
     passes = [
         # convert tosa to linalg on tensors
         "canonicalize",
@@ -43,6 +42,16 @@ def lowering_to_llvm(module : Module) -> Module:
 
         "func.func(tosa-to-tensor)",
         "func.func(tosa-to-arith)",
+    ]
+    pipeline_str = sequential(passes)
+    with module.context as ctx:
+        pm = passmanager.PassManager.parse(pipeline_str)
+        pm.run(module.operation)
+    return module
+
+def lowering_to_llvm(module : Module) -> Module:
+
+    passes = [
         # convert linalg to llvm
         "convert-shape-to-std",
 
@@ -123,8 +132,8 @@ def add_call_interface(module : Module, input_count : int) -> Module:
                 args = func_op.entry_block.arguments
                 input_ptr = args[0] # list of NDArray pointer
 
-                for i in range(input_count):
-                    rank = llvm.CallOp(, [input_ptr])
+                # for i in range(input_count):
+                #     rank = llvm.CallOp(, [input_ptr])
 
                 return_op = func.ReturnOp([args[0]])
 

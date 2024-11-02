@@ -8,7 +8,7 @@ from cake_mlir import passmanager, execution_engine, runtime, frontend
 from cake_mlir.extras import fx_importer
 from cake_mlir.dialects import torch as torch_dialect, math
 from cake_mlir.extras.fx_decomp_util import get_decomposition_table
-from cake_mlir.transform import lowering_to_llvm, add_call_interface
+from cake_mlir.transform import lowering_to_llvm, add_call_interface, lowering_to_linalg
 from cake_mlir import runtime
 
 import ctypes
@@ -69,9 +69,15 @@ mod.operation.print(
     file=open("tosa.mlir", "w")
 )
 
+mod = lowering_to_linalg(mod)
+
+mod.operation.print(
+    file=open("linalg.mlir", "w")
+)
+
 mod = lowering_to_llvm(mod)
 
-mod = add_call_interface(mod, 1)
+# mod = add_call_interface(mod, 1)
 
 mod.operation.print(
     file=open("llvmir.mlir", "w")
