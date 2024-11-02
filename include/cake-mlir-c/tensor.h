@@ -2,7 +2,6 @@
 #define CAKE_MLIR_C_TENSOR_H_
 
 #include <stdint.h>
-#include <dlpack/dlpack.h>
 
 //===----------------------------------------------------------------------===//
 // Visibility annotations.
@@ -45,9 +44,9 @@ DEFINE_C_API_STRUCT(CakeTensor, void);
 
 #undef DEFINE_C_API_STRUCT
 
-MLIR_CAPI_EXPORTED CakeTensor cakeTensorCreate(int32_t ndim, int64_t* shape, DLDataType type);
+// MLIR_CAPI_EXPORTED CakeTensor cakeTensorCreate(int32_t ndim, int64_t* shape, DLDataType type);
 
-MLIR_CAPI_EXPORTED void cakeTensorDestroy(CakeTensor tensor);
+// MLIR_CAPI_EXPORTED void cakeTensorDestroy(CakeTensor tensor);
 
 #ifdef __cplusplus
 }

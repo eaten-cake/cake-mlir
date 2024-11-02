@@ -54,6 +54,7 @@ declare_mlir_python_sources(
     utils/common.py
 )
 
+# Add transform sources.
 declare_mlir_python_sources(
   CakeMLIRPythonSources.Transform
   ADD_TO_PARENT CakeMLIRPythonSources
@@ -61,6 +62,17 @@ declare_mlir_python_sources(
   SOURCES
     transform/__init__.py
     transform/transform.py
+    transform/build_module.py
+    transform/pass.py
+)
+
+# Add structure sources.
+declare_mlir_python_sources(
+  CakeMLIRPythonSources.Structure
+  ADD_TO_PARENT CakeMLIRPythonSources
+  ROOT_DIR "${CakeMLIR_SOURCE_DIR}/python/cake_mlir"
+  SOURCES
+    structure/module.py
 )
 
 declare_mlir_python_sources(
@@ -138,6 +150,7 @@ set(_source_components
   CakeMLIRPythonSources.Core
   CakeMLIRPythonSources.Frontend
   CakeMLIRPythonSources.Transform
+  CakeMLIRPythonSources.Structure
   CakeMLIRPythonSources.Utils
   CakeMLIRPythonSources.Tests
 
