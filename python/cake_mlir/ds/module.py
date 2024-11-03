@@ -9,6 +9,10 @@ class IRModule:
     def __str__(self):
         return str(self.module)
     
+    @property
+    def context(self):
+        return self.module.context
+
     def export(self, filename : str):
         self.module.operation.print(
             file=open(filename, "w")

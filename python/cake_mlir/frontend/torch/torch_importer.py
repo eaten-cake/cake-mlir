@@ -6,6 +6,7 @@ from cake_mlir.passmanager import PassManager
 from cake_mlir.dialects import torch as torch_dialect, func, tosa
 from cake_mlir import transform
 from cake_mlir import utils
+from cake_mlir.ds import IRModule
 
 import torch
 import torch.utils._pytree as pytree
@@ -17,7 +18,7 @@ from typing import Union, Tuple, Any, Optional
 def from_torch(
         model : Union[torch.export.ExportedProgram, torch.nn.Module],
         args : Optional[Tuple[Any, ...]] = None
-) -> Module:
+) -> IRModule:
     ctx = Context()
     torch_dialect.register_dialect(ctx)
     importer = fx_importer.FxImporter(context=ctx)
@@ -105,7 +106,7 @@ def from_torch(
         mod.operation.regions[0].blocks[0].operations[1].attributes["llvm.emit_c_interface"] = UnitAttr.get()
                 
 
-    return mod
+    return IRModule(mod)
 
 
 

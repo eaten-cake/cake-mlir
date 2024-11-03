@@ -34,25 +34,11 @@ def main():
     
     mod = mlc.frontend.from_torch(model, (input,))
 
-    mod.operation.print(
-        file=open("tosa.mlir", "w")
-    )
-
-    mod = mlc.transform.lowering_to_linalg(mod)
-
-    mod.operation.print(
-        file=open("linalg.mlir", "w")
-    )
-
-    mod = mlc.transform.lowering_to_llvm(mod)
-
-    mod.operation.print(
-        file=open("llvm.mlir", "w")
-    )
+    mod = mlc.transform.build(mod)
 
     llvm_home = os.environ.get("LLVM_HOME")
 
-    engine = execution_engine.ExecutionEngine(mod, shared_libs=[f"{llvm_home}/build/lib/libmlir_c_runner_utils.so"])
+    engine = execution_engine.ExecutionEngine(mod.module, shared_libs=[f"{llvm_home}/build/lib/libmlir_c_runner_utils.so"])
 
     input_data = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(x.numpy())))
     res_c = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(np.zeros(output_shape, dtype=np.float32))))

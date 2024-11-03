@@ -1,5 +1,5 @@
 from cake_mlir import passmanager
-from cake_mlir.structure import IRModule
+from cake_mlir.ds import IRModule
 
 class Pass:
 
@@ -14,6 +14,13 @@ class Pass:
     
 class Sequential:
 
-    def __init__(self):
-        self.passes = []
+    def __init__(self, passes : list = []):
+        self.passes = list
+    
+    def __call__(self, module : IRModule) -> IRModule:
+        for p in self.passes:
+            module = p(module)
+        return module
+    
+
 

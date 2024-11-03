@@ -1,6 +1,6 @@
 from . import (
     frontend, 
-    structure,
+    ds,
     transform,
     utils,
     test,    
