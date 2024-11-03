@@ -38,10 +38,12 @@ declare_mlir_python_sources(
   CakeMLIRPythonSources.Frontend
   ADD_TO_PARENT CakeMLIRPythonSources
   ROOT_DIR "${CakeMLIR_SOURCE_DIR}/python/cake_mlir"
-  SOURCES
-    frontend/__init__.py
-    frontend/torch/torch_importer.py
-    frontend/onnx/onnx_importer.py
+  # SOURCES
+  #   frontend/__init__.py
+  #   frontend/torch/torch_importer.py
+  #   frontend/onnx/onnx_importer.py
+  SOURCES_GLOB
+    frontend/*.py
 )
 
 # Add utils sources.
@@ -49,9 +51,11 @@ declare_mlir_python_sources(
   CakeMLIRPythonSources.Utils
   ADD_TO_PARENT CakeMLIRPythonSources
   ROOT_DIR "${CakeMLIR_SOURCE_DIR}/python/cake_mlir"
-  SOURCES
-    utils/__init__.py
-    utils/common.py
+  # SOURCES
+  #   utils/__init__.py
+  #   utils/common.py
+  SOURCES_GLOB
+    utils/*.py
 )
 
 # Add transform sources.
@@ -59,13 +63,15 @@ declare_mlir_python_sources(
   CakeMLIRPythonSources.Transform
   ADD_TO_PARENT CakeMLIRPythonSources
   ROOT_DIR "${CakeMLIR_SOURCE_DIR}/python/cake_mlir"
-  SOURCES
-    transform/__init__.py
-    transform/transform.py
-    transform/build_module.py
-    transform/basic.py
-    transform/passes/passes.py
-    transform/passes/__init__.py
+  # SOURCES
+  #   transform/__init__.py
+  #   transform/transform.py
+  #   transform/build_module.py
+  #   transform/basic.py
+  #   transform/passes/passes.py
+  #   transform/passes/__init__.py
+  SOURCES_GLOB
+    transform/*.py
 )
 
 # Add structure sources.
@@ -73,9 +79,20 @@ declare_mlir_python_sources(
   CakeMLIRPythonSources.Structure
   ADD_TO_PARENT CakeMLIRPythonSources
   ROOT_DIR "${CakeMLIR_SOURCE_DIR}/python/cake_mlir"
-  SOURCES
-    ds/module.py
-    ds/__init__.py
+  # SOURCES
+  #   ds/module.py
+  #   ds/__init__.py
+  SOURCES_GLOB
+    ds/*.py
+)
+
+# Add runtime sources.
+declare_mlir_python_sources(
+  CakeMLIRPythonSources.Runtime
+  ADD_TO_PARENT CakeMLIRPythonSources
+  ROOT_DIR "${CakeMLIR_SOURCE_DIR}/python/cake_mlir"
+  SOURCES_GLOB
+   Runtime/*.py
 )
 
 declare_mlir_python_sources(
@@ -154,6 +171,7 @@ set(_source_components
   CakeMLIRPythonSources.Frontend
   CakeMLIRPythonSources.Transform
   CakeMLIRPythonSources.Structure
+  CakeMLIRPythonSources.Runtime
   CakeMLIRPythonSources.Utils
   CakeMLIRPythonSources.Tests
 

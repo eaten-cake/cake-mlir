@@ -42,6 +42,15 @@ def main():
 
     input_data = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(x.numpy())))
     res_c = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(np.zeros(output_shape, dtype=np.float32))))
+    # res_c = ctypes.pointer(ctypes.pointer(runtime.get_ranked_memref_descriptor(np.array([-1], dtype=np.float32))))
+
+    # print(res_c)
+    # print(res_c[0])
+
+    # memref = res_c[0][0]
+    # print(dir(memref))
+
+    # exit(0)
 
     start_time = time.time()
     engine.invoke("cake_run", *[res_c, input_data])
